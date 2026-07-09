@@ -1,0 +1,174 @@
+---
+import { getCollection } from 'astro:content';
+import BaseHead from '../components/BaseHead.astro';
+import Footer from '../components/Footer.astro';
+import Header from '../components/Header.astro';
+import { SITE_TITLE } from '../consts';
+import fs from 'fs';
+import path from 'path';
+
+const posts = (await getCollection('blog')).sort(
+	(a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf(),
+);
+const sheets = (await getCollection('cheatsheets')).sort(
+	(a, b) => (b.data.pubDate?.valueOf() ?? 0) - (a.data.pubDate?.valueOf() ?? 0),
+);
+const certs = (await getCollection('certs')).sort(
+	(a, b) => b.data.dateEarned.valueOf() - a.data.dateEarned.valueOf(),
+);
+
+function stripMd(text: string): string {
+	return text
+		.replace(/---[\s\S]*?---/, '')
+		.replace(/<[^>]*>/g, '')
+		.replace(/!\[.*?\]\(.*?\)/g, '')
+		.replace(/\[([^\]]*)\]\(.*?\)/g, '$1')
+		.replace(/[#*`>|_~-]/g, ' ')
+		.replace(/["']/g, '')
+		.replace(/\s+/g, ' ')
+		.trim()
+		.toLowerCase();
+}
+
+const contentDir = path.resolve('./src/content');
+
+const index: {
+	title: string;
+	desc: string;
+	body: string;
+	slug: string;
+	type: string;
+	date: string;
+}[] = [];
+
+for (const post of posts) {
+	const filePath = path.join(contentDir, 'blog', post.id + '.md');
+	const body = fs.existsSync(filePath) ? stripMd(fs.readFileSync(filePath, 'utf-8')) : '';
+	index.push({
+		title: post.data.title,
+		desc: post.data.description,
+		body,
+		slug: `/blog/${post.id}/`,
+		type: 'Writeup',
+		date: post.data.pubDate.toISOString().slice(0, 10),
+	});
+}
+for (const sheet of sheets) {
+	const filePath = path.join(contentDir, 'cheatsheets', sheet.id + '.md');
+	const body = fs.existsSync(filePath) ? stripMd(fs.readFileSync(filePath, 'utf-8')) : '';
+	index.push({
+		title: sheet.data.title,
+		desc: sheet.data.description,
+		body,
+		slug: `/cheatsheets/${sheet.id}/`,
+		type: 'Cheatsheet',
+		date: '',
+	});
+}
+for (const cert of certs) {
+	index.push({
+		title: cert.data.title,
+		desc: cert.data.description ?? '',
+		body: (cert.data.skills ?? []).join(' ').toLowerCase(),
+		slug: '/certs/',
+		type: 'Certification',
+		date: cert.data.dateEarned.toISOString().slice(0, 10),
+	});
+}
+---
+
+<!doctype html>
+<html lang="en">
+	<head>
+		<BaseHead title={`Search - ${SITE_TITLE}`} description="Full-text search across all content" />
+		<style>
+			.search-box {
+				width: 100%;
+				padding: 0.8em 1em;
+				font-size: 1.1em;
+				border: 2px solid rgba(200, 218, 195, 0.6);
+				border-radius: 10px;
+				background: rgba(255,255,255,0.6);
+				color: #0f4f53;
+				outline: none;
+				margin-bottom: 2em;
+				box-sizing: border-box;
+				transition: border-color 0.2s;
+			}
+			.search-box:focus { border-color: #2e7d79; }
+			.search-box::placeholder { color: #8fb8a8; }
+			.result-count { color: #5c9a91; font-size: 0.9em; margin-bottom: 1em; }
+			.result-list { list-style: none; padding: 0; margin: 0; }
+			.result-item { padding: 1em 0; border-bottom: 1px solid rgba(200,218,195,0.3); }
+			.result-item:last-child { border-bottom: none; }
+			.result-item a { text-decoration: none; color: inherit; display: block; }
+			.result-item a:hover h3 { color: #2e7d79; }
+			.result-item h3 { margin: 0 0 0.3em; font-size: 1.1em; color: #0f4f53; transition: color 0.2s; }
+			.result-meta { color: #5c9a91; font-size: 0.8em; }
+			.result-desc { color: #3a6b65; font-size: 0.85em; margin: 0.3em 0 0; line-height: 1.5; }
+			.result-type { display: inline-block; background: rgba(191,216,194,0.4); color: #1f6666; padding: 0.1em 0.4em; border-radius: 3px; font-size: 0.7em; margin-right: 0.5em; font-weight: 600; }
+			.result-item.highlight { animation: flash 1.2s ease; }
+			@keyframes flash { 0%, 100% { background: transparent; } 30% { background: rgba(46,125,121,0.12); } }
+			.no-results { text-align: center; padding: 3em; color: #5c9a91; }
+		</style>
+	</head>
+	<body>
+		<Header />
+		<main>
+			<h1>Search</h1>
+			<div id="search-app">
+				<input type="text" id="search-input" class="search-box" placeholder="Search across writeups, cheatsheets, and certifications..." autofocus />
+				<div id="result-count" class="result-count">{index.length} items</div>
+				<ul id="result-list" class="result-list">
+					{index.map((item, i) => (
+						<li class="result-item" data-idx={i}>
+							<a href={item.slug}>
+								<h3><span class="result-type">{item.type}</span>{item.title}</h3>
+								{item.date && <div class="result-meta">{item.date}</div>}
+								<p class="result-desc">{item.desc}</p>
+							</a>
+						</li>
+					))}
+				</ul>
+			</div>
+		</main>
+		<Footer />
+
+		<script id="search-data" type="application/json" set:html={JSON.stringify(index)}></script>
+		<script>
+			const input = document.getElementById('search-input');
+			const list = document.getElementById('result-list');
+			const count = document.getElementById('result-count');
+			const items = Array.from(list.querySelectorAll('.result-item'));
+			const data = JSON.parse(document.getElementById('search-data').textContent);
+
+			input.addEventListener('input', () => {
+				const q = input.value.toLowerCase().trim();
+				let firstIdx = -1;
+				let visible = 0;
+				for (let i = 0; i < items.length; i++) {
+					const d = data[i];
+					const match = q === '' ||
+						d.title.toLowerCase().includes(q) ||
+						d.desc.toLowerCase().includes(q) ||
+						d.body.includes(q);
+					items[i].style.display = match ? '' : 'none';
+					if (match) {
+						visible++;
+						if (firstIdx === -1) firstIdx = i;
+					}
+				}
+				count.textContent = q ? `${visible} of ${items.length} items` : `${items.length} items`;
+				items.forEach((el) => el.classList.remove('highlight'));
+				if (firstIdx !== -1) {
+					const el = items[firstIdx];
+					el.classList.add('highlight');
+					setTimeout(() => {
+						const top = el.getBoundingClientRect().top + window.scrollY - 80;
+						window.scrollTo({ top, behavior: 'smooth' });
+					}, 50);
+				}
+			});
+		</script>
+	</body>
+</html>

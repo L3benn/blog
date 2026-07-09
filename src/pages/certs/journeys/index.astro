@@ -1,0 +1,106 @@
+---
+import { getCollection } from 'astro:content';
+import BaseHead from '../../../components/BaseHead.astro';
+import Footer from '../../../components/Footer.astro';
+import FormattedDate from '../../../components/FormattedDate.astro';
+import Header from '../../../components/Header.astro';
+import { SITE_TITLE } from '../../../consts';
+
+const journeys = (await getCollection('blog'))
+	.filter((post) => post.data.tags?.includes('cert-journey'))
+	.sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
+const certs = await getCollection('certs');
+const certMap = new Map(certs.map((c) => [c.id, c.data.title]));
+---
+
+<!doctype html>
+<html lang="en">
+	<head>
+		<BaseHead title={`Certification Journeys - ${SITE_TITLE}`} description="My journey preparing for and passing certification exams" />
+		<style>
+			.back-link {
+				display: inline-flex;
+				align-items: center;
+				gap: 0.4em;
+				color: #5c9a91;
+				text-decoration: none;
+				font-size: 0.9em;
+				font-weight: 600;
+				margin-bottom: 1.5em;
+			}
+			.back-link:hover {
+				color: #2e7d79;
+			}
+			.journey-list {
+				list-style: none;
+				padding: 0;
+				margin: 0;
+			}
+			.journey-item {
+				padding: 1.5em 0;
+				border-bottom: 1px solid rgba(200,218,195,0.4);
+			}
+			.journey-item:last-child {
+				border-bottom: none;
+			}
+			.journey-item a {
+				text-decoration: none;
+				color: inherit;
+				display: block;
+			}
+			.journey-item a:hover h2 {
+				color: #2e7d79;
+			}
+			.journey-item h2 {
+				margin: 0 0 0.3em;
+				font-size: 1.3em;
+				color: #0f4f53;
+			}
+			.journey-meta {
+				color: #5c9a91;
+				font-size: 0.85em;
+				margin-bottom: 0.5em;
+			}
+			.journey-desc {
+				color: #3a6b65;
+				margin: 0.5em 0;
+				font-size: 0.9em;
+				line-height: 1.5;
+			}
+			.empty-state {
+				text-align: center;
+				padding: 4em 1em;
+				color: #5c9a91;
+			}
+		</style>
+	</head>
+	<body>
+		<Header />
+		<main>
+			<a class="back-link" href="/certs/">&larr; Back to Certifications</a>
+			<h1>Certification Journeys</h1>
+			<p>Blog posts about my experience preparing for and passing each certification exam.</p>
+
+			{journeys.length > 0 ? (
+				<ul class="journey-list">
+					{journeys.map((post) => (
+						<li class="journey-item">
+							<a href={`/blog/${post.id}/`}>
+								<h2>{post.data.title}</h2>
+								<div class="journey-meta">
+									<FormattedDate date={post.data.pubDate} />
+								</div>
+								{post.data.description && <p class="journey-desc">{post.data.description}</p>}
+							</a>
+						</li>
+					))}
+				</ul>
+			) : (
+				<div class="empty-state">
+					<p>No certification journey posts yet. Coming soon!</p>
+				</div>
+			)}
+		</main>
+		<Footer />
+	</body>
+</html>

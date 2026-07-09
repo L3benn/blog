@@ -1,0 +1,84 @@
+---
+import { getCollection } from 'astro:content';
+import BaseHead from '../../../components/BaseHead.astro';
+import Footer from '../../../components/Footer.astro';
+import FormattedDate from '../../../components/FormattedDate.astro';
+import Header from '../../../components/Header.astro';
+import Sidebar from '../../../components/Sidebar.astro';
+import { SITE_TITLE } from '../../../consts';
+
+const allPosts = (await getCollection('blog')).sort(
+	(a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf(),
+);
+
+const posts = allPosts.filter((post) => post.data.tags?.includes('htb'));
+---
+
+<!doctype html>
+<html lang="en">
+	<head>
+		<BaseHead title={`HTB Writeups - ${SITE_TITLE}`} description="Hack The Box machine walkthroughs" />
+		<style>
+			.layout { display: grid; grid-template-columns: 1fr 260px; gap: 2em; align-items: start; }
+			.back { display: inline-block; margin-bottom: 1.5em; color: #2e7d79; text-decoration: none; font-weight: 600; font-size: 0.9em; }
+			.back:hover { text-decoration: underline; }
+			.post-list { list-style: none; padding: 0; margin: 0; }
+			.post-item { padding: 1.2em 0; border-bottom: 1px solid rgba(200,218,195,0.4); }
+			.post-item:last-child { border-bottom: none; }
+			.post-item a { text-decoration: none; color: inherit; display: flex; gap: 1.2em; align-items: flex-start; }
+			.post-item .thumb { width: 180px; height: 110px; border-radius: 10px; object-fit: cover; flex-shrink: 0; background: #d8e4c7; }
+			.post-item h2 { margin: 0 0 0.3em; font-size: 1.2em; color: #0f4f53; transition: color 0.2s; }
+			.post-item a:hover h2 { color: #2e7d79; }
+			.meta { color: #5c9a91; font-size: 0.8em; margin-bottom: 0.4em; }
+			.description { color: #3a6b65; margin: 0 0 0.5em; font-size: 0.85em; line-height: 1.5; }
+			.tags { display: flex; gap: 0.4em; flex-wrap: wrap; }
+			.tag { background: rgba(191, 216, 194, 0.4); color: #1f6666; padding: 0.15em 0.5em; border-radius: 4px; font-size: 0.72em; }
+			.empty-state { text-align: center; padding: 4em 1em; color: #5c9a91; }
+			@media (max-width: 820px) {
+				.layout { grid-template-columns: 1fr; }
+				.post-item a { flex-direction: column; }
+				.post-item .thumb { width: 100%; height: 160px; }
+			}
+		</style>
+	</head>
+	<body>
+		<Header />
+		<main>
+			<a class="back" href="/writeups">&larr; All writeups</a>
+			<h1>HTB Machines</h1>
+			<p>Hack The Box machine walkthroughs.</p>
+
+			<div class="layout">
+				<div>
+					{posts.length > 0 ? (
+						<ul class="post-list">
+							{posts.map((post) => (
+								<li class="post-item">
+									<a href={`/blog/${post.id}/`}>
+										{post.data.thumbnail && <img class="thumb" src={post.data.thumbnail} alt="" loading="lazy" />}
+										<div>
+											<h2>{post.data.title}</h2>
+											<div class="meta"><FormattedDate date={post.data.pubDate} /></div>
+											<p class="description">{post.data.description}</p>
+											{post.data.tags && post.data.tags.length > 0 && (
+												<div class="tags">
+													{post.data.tags.map((tag) => <span class="tag">{tag}</span>)}
+												</div>
+											)}
+										</div>
+									</a>
+								</li>
+							))}
+						</ul>
+					) : (
+						<div class="empty-state">
+							<p>No HTB writeups yet. Coming soon!</p>
+						</div>
+					)}
+				</div>
+				<Sidebar posts={allPosts} currentPath="/writeups/htb/" />
+			</div>
+		</main>
+		<Footer />
+	</body>
+</html>

@@ -1,0 +1,103 @@
+---
+import { getCollection } from 'astro:content';
+import BaseHead from '../../components/BaseHead.astro';
+import Footer from '../../components/Footer.astro';
+import Header from '../../components/Header.astro';
+import Sidebar from '../../components/Sidebar.astro';
+import { SITE_TITLE } from '../../consts';
+
+const sheets = (await getCollection('cheatsheets')).sort(
+	(a, b) => (b.data.pubDate?.valueOf() ?? 0) - (a.data.pubDate?.valueOf() ?? 0),
+);
+
+const allPosts = (await getCollection('blog')).sort(
+	(a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf(),
+);
+---
+
+<!doctype html>
+<html lang="en">
+	<head>
+		<BaseHead title={`Cheatsheets - ${SITE_TITLE}`} description="Security cheatsheets and quick references" />
+		<style>
+			.layout { display: grid; grid-template-columns: 1fr 260px; gap: 2em; align-items: start; }
+			.sheets-list { list-style: none; padding: 0; margin: 0; }
+			.sheet-item {
+				padding: 1.2em 0;
+				border-bottom: 1px solid rgba(200,218,195,0.4);
+			}
+			.sheet-item:last-child { border-bottom: none; }
+			.sheet-item a {
+				text-decoration: none;
+				color: inherit;
+				display: flex;
+				gap: 1em;
+				align-items: flex-start;
+			}
+			.sheet-item .cat-badge {
+				background: rgba(191, 216, 194, 0.4);
+				color: #1f6666;
+				padding: 0.2em 0.6em;
+				border-radius: 4px;
+				font-size: 0.75em;
+				font-weight: 600;
+				flex-shrink: 0;
+				margin-top: 0.2em;
+			}
+			.sheet-item a:hover h2 { color: #2e7d79; }
+			.sheet-item h2 {
+				margin: 0 0 0.3em;
+				font-size: 1.1em;
+				color: #0f4f53;
+				transition: color 0.2s;
+			}
+			.sheet-item .description {
+				color: #3a6b65;
+				font-size: 0.85em;
+				line-height: 1.5;
+				margin: 0;
+			}
+			.empty-state {
+				text-align: center;
+				padding: 4em 1em;
+				color: #5c9a91;
+			}
+			@media (max-width: 820px) {
+				.layout { grid-template-columns: 1fr; }
+			}
+		</style>
+	</head>
+	<body>
+		<Header />
+		<main>
+			<h1>Cheatsheets</h1>
+			<p>Quick references and command cheatsheets for security tools and techniques.</p>
+
+			<div class="layout">
+				<div>
+					{sheets.length > 0 ? (
+						<ul class="sheets-list">
+							{sheets.map((sheet) => (
+								<li class="sheet-item">
+									<a href={`/cheatsheets/${sheet.id}/`}>
+										{sheet.data.category && <span class="cat-badge">{sheet.data.category}</span>}
+										<div>
+											<h2>{sheet.data.title}</h2>
+											<p class="description">{sheet.data.description}</p>
+										</div>
+									</a>
+								</li>
+							))}
+						</ul>
+					) : (
+						<div class="empty-state">
+							<p>No cheatsheets yet.</p>
+						</div>
+					)}
+				</div>
+				<Sidebar posts={allPosts} />
+			</div>
+		</main>
+		<Footer />
+	</body>
+</html>

@@ -1,0 +1,69 @@
+---
+import BaseHead from '../../components/BaseHead.astro';
+import Footer from '../../components/Footer.astro';
+import Header from '../../components/Header.astro';
+import { SITE_TITLE } from '../../consts';
+---
+
+<!doctype html>
+<html lang="en">
+	<head>
+		<BaseHead title={`Writeups - ${SITE_TITLE}`} description="CTF and HTB machine writeups" />
+		<style>
+			.categories {
+				display: grid;
+				grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+				gap: 1.5em;
+				margin-top: 2em;
+			}
+			.card {
+				background: rgba(255,255,255,0.78);
+				backdrop-filter: blur(12px);
+				-webkit-backdrop-filter: blur(12px);
+				border-radius: 16px;
+				padding: 2em;
+				text-decoration: none;
+				transition: transform 0.2s, box-shadow 0.2s;
+			}
+			.card:hover {
+				transform: translateY(-3px);
+				box-shadow: 0 0 30px rgba(46,125,121,0.15);
+			}
+			.card h2 {
+				margin: 0 0 0.5em;
+				color: #0f4f53;
+			}
+			.card p {
+				color: #5c9a91;
+				margin: 0;
+				font-size: 0.95em;
+				line-height: 1.6;
+			}
+			.card .icon {
+				font-size: 2.5em;
+				margin-bottom: 0.5em;
+			}
+		</style>
+	</head>
+	<body>
+		<Header />
+		<main>
+			<h1>Writeups</h1>
+			<p>Detailed walkthroughs for CTF challenges and HTB machines.</p>
+
+			<div class="categories">
+				<a class="card" href="/writeups/htb">
+					<div class="icon">&#x1F4E6;</div>
+					<h2>HTB Machines</h2>
+					<p>Hack The Box machine walkthroughs — from recon to root.</p>
+				</a>
+				<a class="card" href="/writeups/ctf">
+					<div class="icon">&#x1F3AF;</div>
+					<h2>CTF Tasks</h2>
+					<p>Capture The Flag challenge solutions and exploit writeups.</p>
+				</a>
+			</div>
+		</main>
+		<Footer />
+	</body>
+</html>

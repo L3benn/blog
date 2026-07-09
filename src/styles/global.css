@@ -1,80 +1,85 @@
-/*
-  The CSS in this style tag is based off of Bear Blog's default CSS.
-  https://github.com/HermanMartinus/bearblog/blob/297026a877bc2ab2b3bdfbd6b9f7961c350917dd/templates/styles/blog/default.css
-  License MIT: https://github.com/HermanMartinus/bearblog/blob/master/LICENSE.md
- */
-
 :root {
-	--accent: #2337ff;
-	--accent-dark: #000d8a;
-	--black: 15, 18, 25;
-	--gray: 96, 115, 159;
-	--gray-light: 229, 233, 240;
-	--gray-dark: 34, 41, 57;
-	--gray-gradient: rgba(var(--gray-light), 50%), #fff;
+	--accent: #2e7d79;
+	--accent-dark: #1f6666;
+	--accent-light: #5c9a91;
+	--black: 10, 30, 30;
+	--gray: 92, 154, 145;
+	--gray-light: 216, 228, 199;
+	--gray-dark: 15, 79, 83;
+	--border: 200, 218, 195;
 	--box-shadow:
-		0 2px 6px rgba(var(--gray), 25%), 0 8px 24px rgba(var(--gray), 33%),
-		0 16px 32px rgba(var(--gray), 33%);
+		0 8px 32px rgba(15, 79, 83, 0.08),
+		0 2px 8px rgba(15, 79, 83, 0.04);
+}
+html {
+	min-height: 100%;
 }
 body {
 	font-family: var(--font-atkinson);
 	margin: 0;
 	padding: 0;
 	text-align: left;
-	background: linear-gradient(var(--gray-gradient)) no-repeat;
-	background-size: 100% 600px;
+	min-height: 100vh;
+	background:
+		linear-gradient(rgba(216, 228, 199, 0.82), rgba(216, 228, 199, 0.82)),
+		url('/wallhaven-3qrdr6.jpg') center / cover fixed;
 	word-wrap: break-word;
 	overflow-wrap: break-word;
-	color: rgb(var(--gray-dark));
-	font-size: 20px;
-	line-height: 1.7;
+	color: #0f4f53;
+	font-size: 17px;
+	line-height: 1.8;
 }
 main {
-	width: 720px;
-	max-width: calc(100% - 2em);
-	margin: auto;
-	padding: 3em 1em;
+	width: 920px;
+	max-width: calc(100% - 3em);
+	margin: 2.5em auto;
+	padding: 3.5em 3.5em;
+	background: rgba(235, 232, 222, 0.88);
+	border-radius: 16px;
+	backdrop-filter: blur(16px);
+	-webkit-backdrop-filter: blur(16px);
 }
-h1,
-h2,
-h3,
-h4,
-h5,
-h6 {
-	margin: 0 0 0.5rem 0;
-	color: rgb(var(--black));
-	line-height: 1.2;
+h1, h2, h3, h4, h5, h6 {
+	margin: 0 0 0.6rem 0;
+	color: #0f4f53;
+	line-height: 1.25;
+	font-weight: 700;
+	letter-spacing: -0.02em;
 }
 h1 {
-	font-size: 3.052em;
+	font-size: 2.4em;
 }
 h2 {
-	font-size: 2.441em;
+	font-size: 1.7em;
 }
 h3 {
-	font-size: 1.953em;
+	font-size: 1.35em;
 }
 h4 {
-	font-size: 1.563em;
+	font-size: 1.15em;
 }
 h5 {
-	font-size: 1.25em;
+	font-size: 1em;
 }
-strong,
-b {
+strong, b {
 	font-weight: 700;
+	color: #0f4f53;
 }
 a {
-	color: var(--accent);
+	color: #2e7d79;
+	text-decoration: none;
+	transition: color 0.2s;
 }
 a:hover {
-	color: var(--accent);
+	color: #1f6666;
 }
 p {
-	margin-bottom: 1em;
+	margin-bottom: 1.2em;
+	color: #0f4f53;
 }
 .prose p {
-	margin-bottom: 2em;
+	margin-bottom: 1.6em;
+	line-height: 1.85;
 }
 textarea {
 	width: 100%;
@@ -85,43 +90,115 @@ input {
 }
 table {
 	width: 100%;
+	border-collapse: collapse;
+	table-layout: auto;
+}
+@media (max-width: 720px) {
+	table { table-layout: fixed; }
+	td, th { word-break: break-all; }
+}
+table th, table td {
+	padding: 0.6em 1em;
+	border: 1px solid rgb(var(--border));
+	text-align: left;
+	word-break: break-word;
+	overflow-wrap: break-word;
+}
+table th {
+	background: #d8e4c7;
+	font-weight: 600;
+	color: #0f4f53;
 }
 img {
 	max-width: 100%;
 	height: auto;
-	border-radius: 8px;
 }
 code {
-	padding: 2px 5px;
-	background-color: rgb(var(--gray-light));
-	border-radius: 2px;
+	padding: 0.2em 0.4em;
+	background-color: #d8e4c7;
+	border-radius: 4px;
+	font-size: 0.88em;
+	color: #0f4f53;
 }
 pre {
 	padding: 1.5em;
-	border-radius: 8px;
+	border-radius: 12px;
+	overflow-x: auto;
+	background: #1e2a24 !important;
+	border: 1px solid rgba(255, 255, 255, 0.06);
+	white-space: pre-wrap;
+	word-break: break-word;
 }
 pre > code {
 	all: unset;
+	color: #e2e8f0;
+	font-size: 0.85em;
+	line-height: 1.6;
 }
 blockquote {
-	border-left: 4px solid var(--accent);
-	padding: 0 0 0 20px;
-	margin: 0;
-	font-size: 1.333em;
+	border-left: 3px solid #5c9a91;
+	padding: 0.5em 0 0.5em 1.2em;
+	margin: 1.5em 0;
+	color: #5c9a91;
+	font-style: italic;
 }
 hr {
 	border: none;
-	border-top: 1px solid rgb(var(--gray-light));
+	border-top: 1px solid rgb(var(--border));
+	margin: 2em 0;
+}
+
+button, .btn {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.5em;
+	padding: 0.7em 1.6em;
+	background: #2e7d79;
+	color: #fff;
+	border: none;
+	border-radius: 10px;
+	font-size: 0.9em;
+	font-weight: 600;
+	cursor: pointer;
+	text-decoration: none;
+	transition: all 0.25s;
+	box-shadow: 0 0 0 rgba(46, 125, 121, 0);
+}
+button:hover, .btn:hover {
+	background: #1f6666;
+	color: #fff;
+	box-shadow: 0 0 24px rgba(46, 125, 121, 0.25);
+	transform: translateY(-1px);
+}
+button:active, .btn:active {
+	transform: translateY(0);
+}
+
+::selection {
+	background: rgba(46, 125, 121, 0.15);
 }
 @media (max-width: 720px) {
 	body {
-		font-size: 18px;
+		font-size: 15px;
 	}
 	main {
-		padding: 1em;
+		width: 100%;
+		max-width: 100%;
+		margin: 0;
+		padding: 1.5em 1.2em;
+		border-radius: 0;
+		backdrop-filter: none;
+		background: rgba(255, 255, 255, 0.95);
+		min-height: 100vh;
+		box-shadow: none;
+	}
+	h1 {
+		font-size: 1.8em;
+	}
+	h2 {
+		font-size: 1.4em;
 	}
 }
-
 .sr-only {
 	border: 0;
 	padding: 0;
@@ -130,12 +207,8 @@ hr {
 	height: 1px;
 	width: 1px;
 	overflow: hidden;
-	/* IE6, IE7 - a 0 height clip, off to the bottom right of the visible 1px box */
 	clip: rect(1px 1px 1px 1px);
-	/* maybe deprecated but we need to support legacy browsers */
 	clip: rect(1px, 1px, 1px, 1px);
-	/* modern browsers, clip-path works inwards from each corner */
 	clip-path: inset(50%);
-	/* added line to stop words getting smushed together (as they go onto separate lines and some screen readers do not understand line feeds as a space */
 	white-space: nowrap;
 }

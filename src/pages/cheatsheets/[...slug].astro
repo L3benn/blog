@@ -1,0 +1,64 @@
+---
+import { type CollectionEntry, getCollection, render } from 'astro:content';
+import BaseHead from '../../components/BaseHead.astro';
+import Footer from '../../components/Footer.astro';
+import Header from '../../components/Header.astro';
+import { SITE_TITLE } from '../../consts';
+
+export async function getStaticPaths() {
+	const sheets = await getCollection('cheatsheets');
+	return sheets.map((sheet) => ({
+		params: { slug: sheet.id },
+		props: sheet,
+	}));
+}
+type Props = CollectionEntry<'cheatsheets'>;
+
+const sheet = Astro.props;
+const { Content } = await render(sheet);
+---
+
+<html lang="en">
+	<head>
+		<BaseHead title={`${sheet.data.title} - ${SITE_TITLE}`} description={sheet.data.description} />
+		<style>
+			.prose {
+				width: 720px;
+				max-width: calc(100% - 2em);
+				margin: auto;
+				padding: 1em;
+				color: rgb(var(--gray-dark));
+			}
+			.title {
+				margin-bottom: 1.5em;
+				text-align: center;
+			}
+			.title h1 {
+				margin: 0 0 0.3em;
+			}
+			.title .category {
+				display: inline-block;
+				background: rgb(var(--gray-light));
+				color: rgb(var(--gray-dark));
+				padding: 0.2em 0.6em;
+				border-radius: 4px;
+				font-size: 0.85em;
+			}
+		</style>
+	</head>
+	<body>
+		<Header />
+		<main>
+			<article>
+				<div class="prose">
+					<div class="title">
+						{sheet.data.category && <span class="category">{sheet.data.category}</span>}
+						<h1>{sheet.data.title}</h1>
+					</div>
+					<Content />
+				</div>
+			</article>
+		</main>
+		<Footer />
+	</body>
+</html>

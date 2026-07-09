@@ -8,33 +8,16 @@ import Header from '../components/Header.astro';
 
 type Props = CollectionEntry<'blog'>['data'];
 
-const { title, description, pubDate, updatedDate, heroImage } = Astro.props;
+const { title, description, pubDate, updatedDate, heroImage, tags } = Astro.props;
 ---
 
 <html lang="en">
 	<head>
 		<BaseHead title={title} description={description} />
 		<style>
-			main {
-				width: calc(100% - 2em);
-				max-width: 100%;
-				margin: 0;
-			}
-			.hero-image {
-				width: 100%;
-			}
-			.hero-image img {
-				display: block;
+			article {
+				max-width: 720px;
 				margin: 0 auto;
-				border-radius: 12px;
-				box-shadow: var(--box-shadow);
-			}
-			.prose {
-				width: 720px;
-				max-width: calc(100% - 2em);
-				margin: auto;
-				padding: 1em;
-				color: rgb(var(--gray-dark));
 			}
 			.title {
 				margin-bottom: 1em;
@@ -47,10 +30,29 @@ const { title, description, pubDate, updatedDate, heroImage } = Astro.props;
 			}
 			.date {
 				margin-bottom: 0.5em;
-				color: rgb(var(--gray));
+				color: #5c9a91;
 			}
 			.last-updated-on {
 				font-style: italic;
+			}
+			.tags {
+				display: flex;
+				gap: 0.5em;
+				justify-content: center;
+				flex-wrap: wrap;
+				margin-bottom: 1em;
+			}
+			.tag {
+				background: rgba(191, 216, 194, 0.4);
+				color: #1f6666;
+				padding: 0.2em 0.6em;
+				border-radius: 6px;
+				font-size: 0.8em;
+			}
+			.prose img {
+				width: 100%;
+				height: auto;
+				margin: 1.5em 0;
 			}
 		</style>
 	</head>
@@ -59,9 +61,7 @@ const { title, description, pubDate, updatedDate, heroImage } = Astro.props;
 		<Header />
 		<main>
 			<article>
-				<div class="hero-image">
-					{heroImage && <Image width={1020} height={510} src={heroImage} alt="" />}
-				</div>
+				{heroImage && <Image width={1020} height={510} src={heroImage} alt="" />}
 				<div class="prose">
 					<div class="title">
 						<div class="date">
@@ -74,6 +74,13 @@ const { title, description, pubDate, updatedDate, heroImage } = Astro.props;
 								)
 							}
 						</div>
+						{tags && tags.length > 0 && (
+							<div class="tags">
+								{tags.map((tag) => (
+									<span class="tag">{tag}</span>
+								))}
+							</div>
+						)}
 						<h1>{title}</h1>
 						<hr />
 					</div>

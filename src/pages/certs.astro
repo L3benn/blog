@@ -1,0 +1,162 @@
+---
+import { getCollection } from 'astro:content';
+import BaseHead from '../components/BaseHead.astro';
+import Footer from '../components/Footer.astro';
+import FormattedDate from '../components/FormattedDate.astro';
+import Header from '../components/Header.astro';
+import { SITE_TITLE } from '../consts';
+
+const certs = (await getCollection('certs')).sort(
+	(a, b) => b.data.dateEarned.valueOf() - a.data.dateEarned.valueOf(),
+);
+---
+
+<!doctype html>
+<html lang="en">
+	<head>
+		<BaseHead title={`Certifications - ${SITE_TITLE}`} description="My professional certifications" />
+		<style>
+			.cert-grid {
+				display: grid;
+				grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+				gap: 1.5em;
+				margin-top: 1.5em;
+			}
+			.cert-card {
+				background: rgba(235,232,222,0.78);
+				backdrop-filter: blur(12px);
+				-webkit-backdrop-filter: blur(12px);
+				border-radius: 16px;
+				padding: 1.5em;
+				display: flex;
+				flex-direction: column;
+				overflow: hidden;
+			}
+			.cert-card .badge {
+				width: 100%;
+				height: 250px;
+				object-fit: cover;
+				display: block;
+				margin-bottom: 1em;
+			}
+			.cert-card h3 {
+				margin: 0 0 0.3em;
+				font-size: 1.1em;
+				color: #0f4f53;
+			}
+			.cert-card .issuer {
+				color: #5c9a91;
+				font-size: 0.85em;
+				margin-bottom: 0.5em;
+			}
+			.cert-card .date {
+				color: #8fb8a8;
+				font-size: 0.8em;
+				margin-bottom: 0.7em;
+			}
+			.cert-card .desc {
+				color: #3a6b65;
+				font-size: 0.9em;
+				line-height: 1.5;
+				margin-bottom: 0.7em;
+				flex: 1;
+			}
+			.skills {
+				display: flex;
+				flex-wrap: wrap;
+				gap: 0.4em;
+				margin-bottom: 1em;
+			}
+			.skill {
+				background: rgba(191, 216, 194, 0.4);
+				color: #1f6666;
+				padding: 0.2em 0.6em;
+				border-radius: 6px;
+				font-size: 0.75em;
+			}
+			.verify-link {
+				display: inline-flex;
+				align-items: center;
+				gap: 0.4em;
+				color: #2e7d79;
+				text-decoration: none;
+				font-weight: 600;
+				font-size: 0.85em;
+			}
+			.verify-link:hover {
+				color: #1f6666;
+				text-decoration: underline;
+			}
+
+			.journey-btn {
+				display: inline-flex;
+				align-items: center;
+				gap: 0.6em;
+				padding: 0.8em 2em;
+				background: #2e7d79;
+				color: #fff;
+				border-radius: 12px;
+				font-size: 1em;
+				font-weight: 600;
+				text-decoration: none;
+				transition: all 0.25s;
+			}
+			.journey-btn:hover {
+				background: #1f6666;
+				box-shadow: 0 0 24px rgba(46, 125, 121, 0.25);
+				transform: translateY(-2px);
+				color: #fff;
+			}
+			.empty-state {
+				text-align: center;
+				padding: 3em 1em;
+				color: #5c9a91;
+			}
+		</style>
+	</head>
+	<body>
+		<Header />
+		<main>
+			<div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1em;margin-bottom:1.5em">
+				<div>
+					<h1 style="margin:0">Certifications</h1>
+					<p style="margin:0.3em 0 0">Professional certifications I've earned, along with my journey preparing for each one.</p>
+				</div>
+				<a class="journey-btn" href="/certs/journeys/">
+					View all journeys &rarr;
+				</a>
+			</div>
+
+			{certs.length > 0 ? (
+				<div class="cert-grid">
+					{certs.map((cert) => (
+						<div class="cert-card">
+							{cert.data.badgeImage && <img class="badge" src={cert.data.badgeImage} alt={`${cert.data.title} badge`} />}
+							<h3>{cert.data.title}</h3>
+							<div class="issuer">{cert.data.issuer}</div>
+							<div class="date">Earned <FormattedDate date={cert.data.dateEarned} /></div>
+							{cert.data.description && <p class="desc">{cert.data.description}</p>}
+							{cert.data.skills.length > 0 && (
+								<div class="skills">
+									{cert.data.skills.map((s) => <span class="skill">{s}</span>)}
+								</div>
+							)}
+							{cert.data.verifyUrl && (
+								<a class="verify-link" href={cert.data.verifyUrl} target="_blank">
+									Verify credential &nearr;
+								</a>
+							)}
+						</div>
+					))}
+				</div>
+			) : (
+				<div class="empty-state">
+					<p>No certifications added yet.</p>
+				</div>
+			)}
+
+
+		</main>
+		<Footer />
+	</body>
+</html>
