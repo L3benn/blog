@@ -1,4 +1,0 @@
-name = "l3benn-blog"
-
-[pages]
-directory = "dist"
