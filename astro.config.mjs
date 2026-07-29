@@ -6,4 +6,9 @@ export default defineConfig({
 	site: 'https://l3benn.github.io',
 	base: '/',
 	integrations: [mdx(), sitemap()],
+	vite: {
+		server: {
+			allowedHosts: true,
+		},
+	},
 });
