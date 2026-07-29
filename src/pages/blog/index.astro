@@ -5,11 +5,18 @@ import Footer from '../../components/Footer.astro';
 import FormattedDate from '../../components/FormattedDate.astro';
 import Header from '../../components/Header.astro';
 import Sidebar from '../../components/Sidebar.astro';
-import { SITE_TITLE, GITHUB_URL, LINKEDIN_URL, MEDIUM_URL } from '../../consts';
+import { SITE_TITLE } from '../../consts';
 
 const posts = (await getCollection('blog')).sort(
 	(a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf(),
 );
+
+function getPostType(tags: string[] = []): { label: string; badgeClass: string } {
+	if (tags.includes('ctf')) return { label: 'CTF', badgeClass: 'badge-writeup' };
+	if (tags.includes('htb')) return { label: 'HTB', badgeClass: 'badge-writeup' };
+	if (tags.includes('cert-journey')) return { label: 'Journey', badgeClass: 'badge-cert' };
+	return { label: 'Writeup', badgeClass: 'badge-article' };
+}
 ---
 
 <!doctype html>
@@ -30,10 +37,9 @@ const posts = (await getCollection('blog')).sort(
 			}
 			.post-item {
 				padding: 1.2em 0;
-				border-bottom: 1px solid rgba(200,218,195,0.4);
 			}
 			.post-item:last-child {
-				border-bottom: none;
+				padding-bottom: 0;
 			}
 			.post-item a {
 				text-decoration: none;
@@ -43,54 +49,54 @@ const posts = (await getCollection('blog')).sort(
 				align-items: flex-start;
 			}
 			.post-item .thumb {
-				width: 180px;
-				height: 110px;
-				border-radius: 10px;
+				width: 220px;
+				height: 150px;
+				border-radius: 0;
 				object-fit: cover;
+				object-position: center;
 				flex-shrink: 0;
-				background: #d8e4c7;
+				background: #333333;
 			}
 			.post-item h2 {
 				margin: 0 0 0.3em;
 				font-size: 1.2em;
-				color: #0f4f53;
+				color: #e0ede6;
 				transition: color 0.2s;
 			}
 			.post-item a:hover h2 {
-				color: #2e7d79;
+				color: #4fc4b8;
 			}
 			.meta {
-				color: #5c9a91;
+				color: #8ab8a8;
 				font-size: 0.8em;
 				margin-bottom: 0.4em;
 			}
 			.description {
-				color: #3a6b65;
+				color: #8ab8a8;
 				margin: 0 0 0.5em;
 				font-size: 0.85em;
-				line-height: 1.5;
+				line-height: 1.55;
 			}
 			.tags {
 				display: flex;
-				gap: 0.4em;
+				gap: 0.35em;
 				flex-wrap: wrap;
 			}
-			.tag {
-				background: rgba(191, 216, 194, 0.4);
-				color: #1f6666;
-				padding: 0.15em 0.5em;
-				border-radius: 4px;
-				font-size: 0.72em;
+			.post-item .top-row {
+				display: flex;
+				align-items: center;
+				gap: 0.6em;
+				margin-bottom: 0.4em;
 			}
 			.empty-state {
 				text-align: center;
 				padding: 4em 1em;
-				color: #5c9a91;
+				color: #8ab8a8;
 			}
 			.external-sources {
 				margin-top: 3em;
 				padding-top: 2em;
-				border-top: 1px solid rgba(200,218,195,0.5);
+				border-top: 1px solid rgba(79, 196, 184, 0.08);
 			}
 			.external-sources h2 {
 				margin-bottom: 1em;
@@ -103,10 +109,10 @@ const posts = (await getCollection('blog')).sort(
 				margin-bottom: 0.5em;
 			}
 			.external-sources a {
-				color: #2e7d79;
+				color: #4fc4b8;
 				font-weight: 600;
 			}
-			@media (max-width: 820px) {
+			@media (max-width: 880px) {
 				.layout {
 					grid-template-columns: 1fr;
 				}
@@ -130,27 +136,33 @@ const posts = (await getCollection('blog')).sort(
 				<div>
 					{posts.length > 0 ? (
 						<ul class="post-list">
-							{posts.map((post) => (
-								<li class="post-item">
-									<a href={`/blog/${post.id}/`}>
-										{post.data.thumbnail && <img class="thumb" src={post.data.thumbnail} alt="" loading="lazy" />}
-										<div>
-											<h2>{post.data.title}</h2>
-											<div class="meta">
-												<FormattedDate date={post.data.pubDate} />
-											</div>
-											<p class="description">{post.data.description}</p>
-											{post.data.tags && post.data.tags.length > 0 && (
-												<div class="tags">
-													{post.data.tags.map((tag) => (
-														<span class="tag">{tag}</span>
-													))}
+							{posts.map((post) => {
+								const type = getPostType(post.data.tags);
+								return (
+									<li class="post-item">
+										<a href={`/blog/${post.id}/`}>
+											{post.data.thumbnail && <img class="thumb" src={post.data.thumbnail} alt="" loading="lazy" />}
+											<div>
+												<div class="top-row">
+													<span class={"badge " + type.badgeClass}>{type.label}</span>
+													<div class="meta">
+														<FormattedDate date={post.data.pubDate} />
+													</div>
 												</div>
-											)}
-										</div>
-									</a>
-								</li>
-							))}
+												<h2>{post.data.title}</h2>
+												<p class="description">{post.data.description}</p>
+												{post.data.tags && post.data.tags.length > 0 && (
+													<div class="tags">
+														{post.data.tags.map((tag) => (
+															<span class="tag">{tag}</span>
+														))}
+													</div>
+												)}
+											</div>
+										</a>
+									</li>
+								);
+							})}
 						</ul>
 					) : (
 						<div class="empty-state">
@@ -162,9 +174,9 @@ const posts = (await getCollection('blog')).sort(
 						<h2>External writeups</h2>
 						<p>I also publish writeups on these platforms:</p>
 						<ul>
-						<li><a href={GITHUB_URL} target="_blank">GitHub /l3benn</a></li>
-						<li><a href={MEDIUM_URL} target="_blank">Medium</a></li>
-						<li><a href={LINKEDIN_URL} target="_blank">LinkedIn</a></li>
+						<li><a href="https://github.com/l3benn" target="_blank">GitHub /l3benn</a></li>
+						<li><a href="https://medium.com/@chiheb.mahfoudh_11384" target="_blank">Medium</a></li>
+						<li><a href="https://www.linkedin.com/in/chiheb-mahfoudh-285917339/" target="_blank">LinkedIn</a></li>
 						</ul>
 					</div>
 				</div>

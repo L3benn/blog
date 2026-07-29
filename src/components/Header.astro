@@ -5,8 +5,8 @@ import HeaderLink from './HeaderLink.astro';
 
 <header>
 	<nav>
-		<h2><a href="/">{SITE_TITLE}</a></h2>
-		<div class="internal-links">
+		<a href="/" class="logo">{SITE_TITLE}</a>
+		<div class="nav-links">
 			<HeaderLink href="/">Home</HeaderLink>
 			<HeaderLink href="/writeups">Writeups</HeaderLink>
 			<HeaderLink href="/cheatsheets">Cheatsheets</HeaderLink>
@@ -15,24 +15,24 @@ import HeaderLink from './HeaderLink.astro';
 			<HeaderLink href="/search">Search</HeaderLink>
 		</div>
 		<div class="social-links">
-			<a href={GITHUB_URL} target="_blank" title="GitHub">
-				<svg viewBox="0 0 16 16" aria-hidden="true" width="24" height="24"
+			<a href={GITHUB_URL} target="_blank" title="GitHub" aria-label="GitHub">
+				<svg viewBox="0 0 16 16" aria-hidden="true" width="20" height="20"
 					><path
 						fill="currentColor"
 						d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.012 8.012 0 0 0 16 8c0-4.42-3.58-8-8-8z"
 					></path></svg
 				>
 			</a>
-			<a href={MEDIUM_URL} target="_blank" title="Medium">
-				<svg viewBox="0 0 16 16" aria-hidden="true" width="24" height="24"
+			<a href={MEDIUM_URL} target="_blank" title="Medium" aria-label="Medium">
+				<svg viewBox="0 0 16 16" aria-hidden="true" width="20" height="20"
 					><path
 						fill="currentColor"
 						d="M9.025 8c0 2.485-2.02 4.5-4.513 4.5A4.506 4.506 0 0 1 0 8c0-2.486 2.02-4.5 4.512-4.5A4.506 4.506 0 0 1 9.025 8zm4.95 0c0 2.34-1.01 4.236-2.256 4.236S9.463 10.34 9.463 8s1.01-4.236 2.256-4.236S13.975 5.66 13.975 8zM16 8c0 2.096-.355 3.795-.794 3.795-.438 0-.793-1.7-.793-3.795 0-2.096.355-3.795.794-3.795.438 0 .793 1.699.793 3.795z"
 					></path></svg
 				>
 			</a>
-			<a href={LINKEDIN_URL} target="_blank" title="LinkedIn">
-				<svg viewBox="0 0 16 16" aria-hidden="true" width="24" height="24"
+			<a href={LINKEDIN_URL} target="_blank" title="LinkedIn" aria-label="LinkedIn">
+				<svg viewBox="0 0 16 16" aria-hidden="true" width="20" height="20"
 					><path
 						fill="currentColor"
 						d="M0 1.146C0 .513.526 0 1.175 0h13.65C15.474 0 16 .513 16 1.146v13.708c0 .633-.526 1.146-1.175 1.146H1.175C.526 16 0 15.487 0 14.854V1.146zm4.943 12.248V6.169H2.542v7.225h2.401zm-1.2-8.212c.837 0 1.358-.554 1.358-1.248-.015-.709-.52-1.248-1.342-1.248-.822 0-1.359.54-1.359 1.248 0 .694.521 1.248 1.327 1.248h.016zm4.908 8.212V9.359c0-.216.016-.432.08-.586.173-.431.568-.878 1.232-.878.869 0 1.216.662 1.216 1.634v3.865h2.401V9.25c0-2.22-1.184-3.252-2.764-3.252-1.274 0-1.845.7-2.165 1.193v.025h-.016a5.54 5.54 0 0 1 .016-.025V6.169h-2.4c.03.678 0 7.225 0 7.225h2.4z"
@@ -45,58 +45,76 @@ import HeaderLink from './HeaderLink.astro';
 <style>
 	header {
 		margin: 0;
-		padding: 0 1.5em;
-		background: rgba(235, 232, 222, 0.75);
-		backdrop-filter: blur(14px);
-		-webkit-backdrop-filter: blur(14px);
+		padding: 0 2em;
+		background: rgba(14, 14, 14, 0.85);
+		backdrop-filter: blur(16px);
+		-webkit-backdrop-filter: blur(16px);
 		position: sticky;
 		top: 0;
-		z-index: 10;
-		border-bottom: 1px solid rgba(200, 218, 195, 0.5);
+		z-index: 100;
 	}
-	h2 {
-		margin: 0;
-		font-size: 1em;
-	}
-	h2 a, h2 a.active {
+	.logo {
+		font-size: 1.1em;
+		font-weight: 700;
+		color: #e0ede6;
 		text-decoration: none;
-		color: #0f4f53;
+		letter-spacing: -0.02em;
+		padding: 0.8em 0;
+		display: block;
+	}
+	.logo:hover {
+		color: #4fc4b8;
 	}
 	nav {
 		display: flex;
 		align-items: center;
 		justify-content: space-between;
+		gap: 1.5em;
+		max-width: 920px;
+		margin: 0 auto;
 	}
-	nav a {
-		padding: 1em 0.7em;
-		color: #5c9a91;
+	.nav-links {
+		display: flex;
+		gap: 0.2em;
+	}
+	.nav-links a {
+		padding: 0.85em 0.75em;
+		color: #8ab8a8;
 		text-decoration: none;
-		font-size: 0.9em;
-		font-weight: 600;
+		font-size: 0.88em;
+		font-weight: 500;
 		letter-spacing: 0.01em;
 		transition: color 0.2s;
+		border-radius: 0;
 	}
-	nav a:hover {
-		color: #2e7d79;
+	.nav-links a:hover {
+		color: #e0ede6;
 	}
-	nav a.active {
-		color: #2e7d79;
-		box-shadow: inset 0 -2px 0 #2e7d79;
+	.nav-links a.active {
+		color: #6dd6ca;
 	}
-	.internal-links {
+	.social-links {
 		display: flex;
-		gap: 0.5em;
+		gap: 0.3em;
 	}
-	.social-links,
 	.social-links a {
 		display: flex;
-	}
-	.social-links a {
+		align-items: center;
+		justify-content: center;
 		padding: 0.5em;
+		color: #8ab8a8;
+		border-radius: 0;
+		transition: all 0.2s;
 	}
-	@media (max-width: 720px) {
-		.social-links {
-			display: none;
-		}
+	.social-links a:hover {
+		color: #4fc4b8;
+	}
+	@media (max-width: 880px) {
+		header { padding: 0 1em; }
+		.nav-links a { padding: 0.85em 0.5em; font-size: 0.82em; }
+	}
+	@media (max-width: 640px) {
+		.social-links { display: none; }
+		.nav-links { gap: 0; }
 	}
 </style>

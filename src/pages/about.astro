@@ -13,20 +13,18 @@ import { GITHUB_URL, LINKEDIN_URL, MEDIUM_URL, EMAIL, SITE_TITLE } from '../cons
 			.about-grid {
 				display: grid;
 				grid-template-columns: 1fr 1fr;
-				gap: 2em;
+				gap: 1.5em;
 				margin-top: 1.5em;
 			}
 			.about-card {
-				background: rgba(235,232,222,0.78);
-				backdrop-filter: blur(12px);
-				-webkit-backdrop-filter: blur(12px);
-				border-radius: 12px;
+				
+				border-radius: 0;
 				padding: 1.5em;
 			}
 			.about-card h2 {
-				margin: 0 0 0.8em;
-				font-size: 1.15em;
-				color: #0f4f53;
+				margin: 0 0 0.7em;
+				font-size: 1.1em;
+				color: #e0ede6;
 			}
 			.about-card ul {
 				list-style: none;
@@ -34,67 +32,52 @@ import { GITHUB_URL, LINKEDIN_URL, MEDIUM_URL, EMAIL, SITE_TITLE } from '../cons
 				margin: 0;
 			}
 			.about-card li {
-				padding: 0.4em 0;
-				color: #3a6b65;
-				font-size: 0.9em;
+				padding: 0.35em 0;
+				color: #8ab8a8;
+				font-size: 0.88em;
 				line-height: 1.5;
 			}
 			.about-card li::before {
 				content: '>';
-				color: #2e7d79;
+				color: #4fc4b8;
 				font-weight: 700;
 				margin-right: 0.5em;
 			}
 			.about-card a {
-				color: #2e7d79;
-				font-weight: 600;
-			}
-			.about-card a:hover {
-				color: #1f6666;
+				color: #4fc4b8;
+				font-weight: 500;
 			}
 			.cert-list {
 				display: flex;
 				flex-wrap: wrap;
-				gap: 0.5em;
+				gap: 0.4em;
 				margin-top: 0.5em;
-			}
-			.cert-badge {
-				background: rgba(191, 216, 194, 0.4);
-				color: #1f6666;
-				padding: 0.25em 0.7em;
-				border-radius: 6px;
-				font-size: 0.8em;
-				font-weight: 600;
 			}
 			.social-links {
 				display: flex;
 				flex-wrap: wrap;
-				gap: 0.8em;
+				gap: 0.6em;
 				margin-top: 1.5em;
 			}
 			.social-links a {
 				display: inline-flex;
 				align-items: center;
 				gap: 0.4em;
-				padding: 0.6em 1.2em;
-				background: rgba(235,232,222,0.78);
-				backdrop-filter: blur(12px);
-				-webkit-backdrop-filter: blur(12px);
-				border-radius: 8px;
-				color: #2e7d79;
+				padding: 0.5em 1em;
+				
+				border-radius: 0;
+				color: #8ab8a8;
 				text-decoration: none;
-				font-size: 0.85em;
-				font-weight: 600;
-				transition: all 0.2s;
+				font-size: 0.82em;
+				font-weight: 500;
+				transition: background 0.2s;
 			}
 			.social-links a:hover {
-				background: #2e7d79;
-				color: #fff;
+				color: #e0ede6;
+				background: rgba(40, 40, 40, 0.88);
 			}
 			@media (max-width: 700px) {
-				.about-grid {
-					grid-template-columns: 1fr;
-				}
+				.about-grid { grid-template-columns: 1fr; }
 			}
 		</style>
 	</head>
@@ -137,11 +120,11 @@ import { GITHUB_URL, LINKEDIN_URL, MEDIUM_URL, EMAIL, SITE_TITLE } from '../cons
 				<div class="about-card">
 					<h2>Certifications</h2>
 					<div class="cert-list">
-						<span class="cert-badge">HTB CPTS</span>
-						<span class="cert-badge">HTB CWES</span>
-						<span class="cert-badge">CRTP</span>
+						<span class="tag">HTB CPTS</span>
+						<span class="tag">HTB CWES</span>
+						<span class="tag">CRTP</span>
 					</div>
-					<h2 style="margin-top:3em">Interests</h2>
+					<h2 style="margin-top:2.5em">Interests</h2>
 					<ul>
 						<li>Vulnerability Research</li>
 						<li>Reverse Engineering</li>
@@ -152,7 +135,7 @@ import { GITHUB_URL, LINKEDIN_URL, MEDIUM_URL, EMAIL, SITE_TITLE } from '../cons
 				</div>
 			</div>
 
-			<h2>Where to find me</h2>
+			<h2 style="margin-top:2em">Where to find me</h2>
 			<div class="social-links">
 				<a href={GITHUB_URL} target="_blank">GitHub (l3benn)</a>
 				<a href={MEDIUM_URL} target="_blank">Medium</a>

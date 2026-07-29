@@ -23,11 +23,8 @@ const { Content } = await render(sheet);
 		<BaseHead title={`${sheet.data.title} - ${SITE_TITLE}`} description={sheet.data.description} />
 		<style>
 			.prose {
-				width: 720px;
-				max-width: calc(100% - 2em);
+				max-width: 880px;
 				margin: auto;
-				padding: 1em;
-				color: rgb(var(--gray-dark));
 			}
 			.title {
 				margin-bottom: 1.5em;
@@ -38,11 +35,12 @@ const { Content } = await render(sheet);
 			}
 			.title .category {
 				display: inline-block;
-				background: rgb(var(--gray-light));
-				color: rgb(var(--gray-dark));
+				background: rgba(79, 196, 184, 0.1);
+				color: #6dd6ca;
 				padding: 0.2em 0.6em;
-				border-radius: 4px;
-				font-size: 0.85em;
+				border-radius: 0;
+				font-size: 0.82em;
+				font-weight: 500;
 			}
 		</style>
 	</head>

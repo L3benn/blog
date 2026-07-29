@@ -3,7 +3,7 @@ import BaseHead from '../components/BaseHead.astro';
 import Footer from '../components/Footer.astro';
 import FormattedDate from '../components/FormattedDate.astro';
 import Header from '../components/Header.astro';
-import { SITE_DESCRIPTION, SITE_TITLE, GITHUB_URL, LINKEDIN_URL, MEDIUM_URL } from '../consts';
+import { SITE_DESCRIPTION, SITE_TITLE, GITHUB_URL, LINKEDIN_URL, MEDIUM_URL, EMAIL } from '../consts';
 import { getCollection } from 'astro:content';
 
 const posts = (await getCollection('blog'))
@@ -13,19 +13,12 @@ const posts = (await getCollection('blog'))
 const certs = await getCollection('certs');
 const cheatsheets = await getCollection('cheatsheets');
 
-const allTags = [...new Set(posts.flatMap((p) => p.data.tags ?? []))].sort();
-const tagCounts = posts.reduce(
-	(acc, p) => {
-		(p.data.tags ?? []).forEach((t) => {
-			acc[t] = (acc[t] || 0) + 1;
-		});
-		return acc;
-	},
-	{} as Record<string, number>,
-);
-const topTags = Object.entries(tagCounts)
-	.sort((a, b) => b[1] - a[1])
-	.slice(0, 8);
+function getPostType(tags: string[] = []): { label: string; badgeClass: string } {
+	if (tags.includes('ctf')) return { label: 'CTF', badgeClass: 'badge-writeup' };
+	if (tags.includes('htb')) return { label: 'HTB', badgeClass: 'badge-writeup' };
+	if (tags.includes('cert-journey')) return { label: 'Journey', badgeClass: 'badge-cert' };
+	return { label: 'Writeup', badgeClass: 'badge-article' };
+}
 ---
 
 <!doctype html>
@@ -36,101 +29,91 @@ const topTags = Object.entries(tagCounts)
 			.hero {
 				display: flex;
 				align-items: center;
-				gap: 2.5em;
-				padding: 2em 0 3em;
+				gap: 3em;
+				padding: 2.5em 0 3.5em;
 			}
 			.avatar {
-				width: 110px;
-				height: 110px;
-				border-radius: 50%;
+				width: 120px;
+				height: 120px;
+				border-radius: 0;
 				object-fit: cover;
 				flex-shrink: 0;
-				border: 3px solid rgba(200, 218, 195, 0.6);
 			}
 			.hero-text h1 {
-				margin: 0 0 0.2em;
-				font-size: 2em;
+				margin: 0 0 0.15em;
+				font-size: 2.2em;
+				letter-spacing: -0.03em;
 			}
 			.hero-text .tagline {
-				color: #5c9a91;
+				color: #4fc4b8;
 				font-size: 1em;
 				margin: 0 0 0.6em;
+				font-weight: 500;
 			}
 			.hero-text .bio {
-				color: #3a6b65;
+				color: #8ab8a8;
 				font-size: 0.9em;
-				line-height: 1.6;
+				line-height: 1.7;
 				margin: 0;
+				max-width: 540px;
 			}
 			.hero-links {
 				display: flex;
-				gap: 0.8em;
-				margin-top: 0.8em;
+				flex-wrap: wrap;
+				gap: 0.6em;
+				margin-top: 1em;
 			}
 			.hero-links a {
 				display: inline-flex;
 				align-items: center;
-				gap: 0.3em;
-				color: #5c9a91;
+				gap: 0.4em;
+				padding: 0.3em 0.8em;
+				border-radius: 0;
 				font-size: 0.85em;
-				font-weight: 600;
+				font-weight: 500;
 				text-decoration: none;
-				transition: color 0.2s;
+				color: #8ab8a8;
 			}
 			.hero-links a:hover {
-				color: #2e7d79;
+				color: #e0ede6;
 			}
 
-			.stats {
+			.stats-grid {
 				display: grid;
 				grid-template-columns: repeat(3, 1fr);
 				gap: 1em;
-				margin-bottom: 3em;
+				margin-bottom: 3.5em;
 			}
 			.stat-card {
-				background: rgba(235,232,222,0.78);
-				backdrop-filter: blur(12px);
-				-webkit-backdrop-filter: blur(12px);
-				border-radius: 12px;
-				padding: 1.2em;
+				padding: 1.4em 1.2em;
 				text-align: center;
 			}
 			.stat-number {
-				font-size: 1.8em;
+				font-size: 2em;
 				font-weight: 700;
-				color: #0f4f53;
+				color: #4fc4b8;
 				display: block;
+				line-height: 1.2;
 			}
 			.stat-label {
-				color: #5c9a91;
+				color: #8ab8a8;
 				font-size: 0.8em;
-				margin-top: 0.2em;
+				margin-top: 0.3em;
 				display: block;
-			}
-
-			.section-title {
-				font-size: 1.3em;
-				margin-bottom: 1.2em;
-				color: #0f4f53;
+				font-weight: 500;
 			}
 
 			.post-grid {
 				display: grid;
-				grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+				grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
 				gap: 1.2em;
-				margin-bottom: 2.5em;
+				margin-bottom: 2em;
 			}
 			.post-card {
-				background: rgba(235,232,222,0.78);
-				backdrop-filter: blur(12px);
-				-webkit-backdrop-filter: blur(12px);
-				border-radius: 12px;
+				border-radius: 0;
 				overflow: hidden;
-				transition: transform 0.2s, box-shadow 0.2s;
 			}
 			.post-card:hover {
-				transform: translateY(-3px);
-				box-shadow: 0 8px 32px rgba(15, 79, 83, 0.12);
 			}
 			.post-card a {
 				text-decoration: none;
@@ -139,96 +122,56 @@ const topTags = Object.entries(tagCounts)
 			}
 			.post-card .thumb {
 				width: 100%;
-				height: 180px;
+				height: 220px;
 				object-fit: cover;
+				object-position: center;
 				display: block;
-				background: #d8e4c7;
+				background: #222222;
 			}
 			.post-card .body {
-				padding: 1.2em;
+				padding: 1.2em 1.3em;
+			}
+			.post-card .top-row {
+				display: flex;
+				align-items: center;
+				gap: 0.6em;
+				margin-bottom: 0.5em;
 			}
 			.post-card h3 {
-				margin: 0 0 0.4em;
+				margin: 0 0 0.35em;
 				font-size: 1.05em;
-				color: #0f4f53;
+				color: #e0ede6;
 				line-height: 1.35;
+				transition: color 0.2s;
+			}
+			.post-card a:hover h3 {
+				color: #4fc4b8;
 			}
 			.post-card .meta {
-				color: #5c9a91;
-				font-size: 0.8em;
+				color: #8ab8a8;
+				font-size: 0.78em;
 				margin-bottom: 0.5em;
 			}
 			.post-card .desc {
-				color: #3a6b65;
-				font-size: 0.85em;
-				line-height: 1.5;
+				color: #8ab8a8;
+				font-size: 0.83em;
+				line-height: 1.55;
 				margin: 0;
+				display: -webkit-box;
+				-webkit-line-clamp: 2;
+				-webkit-box-orient: vertical;
+				overflow: hidden;
 			}
 			.post-card .tags {
 				display: flex;
-				gap: 0.4em;
+				gap: 0.35em;
 				flex-wrap: wrap;
 				margin-top: 0.7em;
 			}
-			.post-card .tag {
-				background: rgba(191, 216, 194, 0.4);
-				color: #1f6666;
-				padding: 0.15em 0.5em;
-				border-radius: 4px;
-				font-size: 0.7em;
-			}
 
-			.view-all {
-				display: inline-flex;
-				align-items: center;
-				gap: 0.5em;
-				padding: 0.7em 1.6em;
-				background: #2e7d79;
-				color: #fff;
-				border-radius: 10px;
-				font-size: 0.9em;
-				font-weight: 600;
-				text-decoration: none;
-				transition: all 0.25s;
-			}
-			.view-all:hover {
-				background: #1f6666;
-				box-shadow: 0 0 24px rgba(46, 125, 121, 0.25);
-				transform: translateY(-1px);
-				color: #fff;
-			}
-
-			.topics {
-				margin-top: 3em;
-				padding-top: 2em;
-				border-top: 1px solid rgba(200, 218, 195, 0.5);
-			}
-			.topics h2 {
-				margin-bottom: 1em;
-			}
-			.topic-links {
-				display: flex;
-				flex-wrap: wrap;
-				gap: 0.6em;
-			}
-			.topic-links a {
-				display: inline-flex;
-				align-items: center;
-				gap: 0.4em;
-				padding: 0.5em 1em;
-				background: rgba(235,232,222,0.78);
-				backdrop-filter: blur(12px);
-				-webkit-backdrop-filter: blur(12px);
-				border-radius: 8px;
-				color: #2e7d79;
-				text-decoration: none;
-				font-size: 0.85em;
-				font-weight: 600;
-				transition: all 0.2s;
-			}
-			.topic-links a:hover {
-				background: #2e7d79;
-				color: #fff;
+			.view-all-wrap {
+				text-align: center;
+				margin-bottom: 3em;
 			}
 
 			@media (max-width: 600px) {
@@ -236,12 +179,25 @@ const topTags = Object.entries(tagCounts)
 					flex-direction: column;
 					text-align: center;
 					gap: 1.5em;
+					padding: 1.5em 0 2em;
+				}
+				.hero-text .bio {
+					max-width: 100%;
 				}
 				.hero-links {
 					justify-content: center;
 				}
 				.post-grid {
 					grid-template-columns: 1fr;
+				}
+				.stats-grid {
+					gap: 0.7em;
+				}
+				.stat-card {
+					padding: 1em 0.8em;
+				}
+				.explore-grid {
+					grid-template-columns: 1fr 1fr;
 				}
 			}
 		</style>
@@ -252,21 +208,21 @@ const topTags = Object.entries(tagCounts)
 			<section class="hero">
 				<img class="avatar" src="/kakashi.jpg" alt="l3benn" />
 				<div class="hero-text">
-					<h1>Chiheb MAHFOUDH</h1>
-					<p class="tagline">Security researcher & CTF enthusiast</p>
+					<h1>Chiheb Mahfoudh</h1>
+					<p class="tagline">Security researcher &bull; CTF enthusiast &bull; Pentest student</p>
 					<p class="bio">
-						Second-year Computer Networks and Telecommunications student at ISETCOM with a strong passion for Offensive Security, Penetration Testing, Active Directory security, and Red Teaming. Holder of industry-recognized certifications including HTB CPTS, HTB CWES, and CRTP. Hands-on experience through CTF competitions, challenge authoring, enterprise AD labs, and DevSecOps internship experience integrating security into CI/CD pipelines.
+						Breaking things, learning, and sharing writeups on penetration testing, AD security, CTF challenges, and red teaming.
 					</p>
 					<div class="hero-links">
 						<a href={GITHUB_URL} target="_blank">GitHub</a>
 						<a href={MEDIUM_URL} target="_blank">Medium</a>
 						<a href={LINKEDIN_URL} target="_blank">LinkedIn</a>
-						<a href="/about">About me</a>
+						<a href="/about">About &rarr;</a>
 					</div>
 				</div>
 			</section>
 
-			<div class="stats">
+			<div class="stats-grid">
 				<div class="stat-card">
 					<span class="stat-number">{posts.length}</span>
 					<span class="stat-label">Writeups</span>
@@ -286,41 +242,39 @@ const topTags = Object.entries(tagCounts)
 				{posts.length > 0 ? (
 					<>
 						<div class="post-grid">
-							{posts.map((post) => (
-								<div class="post-card">
-									<a href={`/blog/${post.id}/`}>
-										{post.data.thumbnail && <img class="thumb" src={post.data.thumbnail} alt="" loading="lazy" />}
-										<div class="body">
-											<h3>{post.data.title}</h3>
-											<div class="meta"><FormattedDate date={post.data.pubDate} /></div>
-											{post.data.description && <p class="desc">{post.data.description}</p>}
-											{post.data.tags && post.data.tags.length > 0 && (
-												<div class="tags">
-													{post.data.tags.slice(0, 4).map((tag) => <span class="tag">{tag}</span>)}
+							{posts.map((post) => {
+								const type = getPostType(post.data.tags);
+								return (
+									<div class="post-card">
+										<a href={`/blog/${post.id}/`}>
+											{post.data.thumbnail && <img class="thumb" src={post.data.thumbnail} alt="" loading="lazy" />}
+											<div class="body">
+												<div class="top-row">
+													<span class={"badge " + type.badgeClass}>{type.label}</span>
+													<span class="meta"><FormattedDate date={post.data.pubDate} /></span>
 												</div>
-											)}
-										</div>
-									</a>
-								</div>
-							))}
+												<h3>{post.data.title}</h3>
+												{post.data.description && <p class="desc">{post.data.description}</p>}
+												{post.data.tags && post.data.tags.length > 0 && (
+													<div class="tags">
+														{post.data.tags.slice(0, 3).map((tag) => <span class="tag">{tag}</span>)}
+													</div>
+												)}
+											</div>
+										</a>
+									</div>
+								);
+							})}
 						</div>
-						<a href="/writeups" class="view-all">View all writeups &rarr;</a>
+						<div class="view-all-wrap">
+							<a href="/writeups" class="btn">View all writeups &rarr;</a>
+						</div>
 					</>
 				) : (
 					<p>No writeups yet. Check back soon!</p>
 				)}
 			</section>
 
-			<section class="topics">
-				<h2>Explore</h2>
-				<div class="topic-links">
-					<a href="/writeups/htb/">HTB Writeups</a>
-					<a href="/writeups/ctf/">CTF Writeups</a>
-					<a href="/certs/">Certifications</a>
-					<a href="/cheatsheets/">Cheatsheets</a>
-					<a href="/certs/journeys/">Cert Journeys</a>
-				</div>
-			</section>
 		</main>
 		<Footer />
 	</body>

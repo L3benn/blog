@@ -22,14 +22,18 @@ const certMap = new Map(certs.map((c) => [c.id, c.data.title]));
 				display: inline-flex;
 				align-items: center;
 				gap: 0.4em;
-				color: #5c9a91;
+				color: #8ab8a8;
 				text-decoration: none;
 				font-size: 0.9em;
-				font-weight: 600;
+				font-weight: 500;
 				margin-bottom: 1.5em;
+				transition: color 0.2s;
 			}
 			.back-link:hover {
-				color: #2e7d79;
+				color: #e0ede6;
+			}
+			.back-link:hover {
+				color: #4fc4b8;
 			}
 			.journey-list {
 				list-style: none;
@@ -38,10 +42,9 @@ const certMap = new Map(certs.map((c) => [c.id, c.data.title]));
 			}
 			.journey-item {
 				padding: 1.5em 0;
-				border-bottom: 1px solid rgba(200,218,195,0.4);
 			}
 			.journey-item:last-child {
-				border-bottom: none;
+				padding-bottom: 0;
 			}
 			.journey-item a {
 				text-decoration: none;
@@ -49,20 +52,24 @@ const certMap = new Map(certs.map((c) => [c.id, c.data.title]));
 				display: block;
 			}
 			.journey-item a:hover h2 {
-				color: #2e7d79;
+				color: #4fc4b8;
 			}
 			.journey-item h2 {
 				margin: 0 0 0.3em;
 				font-size: 1.3em;
-				color: #0f4f53;
+				color: #e0ede6;
+				transition: color 0.2s;
+			}
+			.journey-item a:hover h2 {
+				color: #4fc4b8;
 			}
 			.journey-meta {
-				color: #5c9a91;
+				color: #8ab8a8;
 				font-size: 0.85em;
 				margin-bottom: 0.5em;
 			}
 			.journey-desc {
-				color: #3a6b65;
+				color: #8ab8a8;
 				margin: 0.5em 0;
 				font-size: 0.9em;
 				line-height: 1.5;
@@ -70,7 +77,7 @@ const certMap = new Map(certs.map((c) => [c.id, c.data.title]));
 			.empty-state {
 				text-align: center;
 				padding: 4em 1em;
-				color: #5c9a91;
+				color: #8ab8a8;
 			}
 		</style>
 	</head>

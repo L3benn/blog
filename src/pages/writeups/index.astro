@@ -17,31 +17,31 @@ import { SITE_TITLE } from '../../consts';
 				margin-top: 2em;
 			}
 			.card {
-				background: rgba(255,255,255,0.78);
+				
 				backdrop-filter: blur(12px);
 				-webkit-backdrop-filter: blur(12px);
-				border-radius: 16px;
+				border-radius: 0;
 				padding: 2em;
 				text-decoration: none;
-				transition: transform 0.2s, box-shadow 0.2s;
+				transition: background 0.2s;
 			}
 			.card:hover {
-				transform: translateY(-3px);
-				box-shadow: 0 0 30px rgba(46,125,121,0.15);
+				background: rgba(40, 40, 40, 0.88);
 			}
 			.card h2 {
-				margin: 0 0 0.5em;
-				color: #0f4f53;
+				margin: 0 0 0.4em;
+				color: #e0ede6;
 			}
 			.card p {
-				color: #5c9a91;
+				color: #8ab8a8;
 				margin: 0;
-				font-size: 0.95em;
+				font-size: 0.92em;
 				line-height: 1.6;
 			}
 			.card .icon {
-				font-size: 2.5em;
+				font-size: 2.2em;
 				margin-bottom: 0.5em;
+				display: block;
 			}
 		</style>
 	</head>
@@ -53,12 +53,12 @@ import { SITE_TITLE } from '../../consts';
 
 			<div class="categories">
 				<a class="card" href="/writeups/htb">
-					<div class="icon">&#x1F4E6;</div>
+					<span class="icon">&#x1F4E6;</span>
 					<h2>HTB Machines</h2>
 					<p>Hack The Box machine walkthroughs — from recon to root.</p>
 				</a>
 				<a class="card" href="/writeups/ctf">
-					<div class="icon">&#x1F3AF;</div>
+					<span class="icon">&#x1F3AF;</span>
 					<h2>CTF Tasks</h2>
 					<p>Capture The Flag challenge solutions and exploit writeups.</p>
 				</a>
