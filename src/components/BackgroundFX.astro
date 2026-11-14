@@ -1,0 +1,181 @@
+---
+// Kakashi background layer, behind all content:
+//  - Chidori: thin lightning bolts that arc across the page every few seconds
+//  - Kamui: a huge, faint Mangekyō pinwheel turning slowly in the corner
+---
+
+<div class="bgfx" aria-hidden="true">
+	<svg class="kamui-mark" viewBox="0 0 200 200">
+		<circle cx="100" cy="100" r="94" fill="none" stroke="currentColor" stroke-width="5"></circle>
+		<circle cx="100" cy="100" r="58" fill="none" stroke="currentColor" stroke-width="1"></circle>
+		<circle cx="100" cy="100" r="13" fill="currentColor"></circle>
+		{[0, 120, 240].map((deg) => (
+			<path
+				transform={`rotate(${deg} 100 100)`}
+				fill="currentColor"
+				d="M100 88 C94 62 108 30 146 18 C128 40 122 64 130 96 C120 86 110 84 100 88 Z"
+			/>
+		))}
+	</svg>
+	<canvas id="chidori"></canvas>
+</div>
+
+<style>
+	.bgfx {
+		position: fixed;
+		inset: 0;
+		z-index: -1;
+		overflow: hidden;
+		pointer-events: none;
+	}
+	#chidori {
+		position: absolute;
+		inset: 0;
+		width: 100%;
+		height: 100%;
+	}
+	.kamui-mark {
+		position: absolute;
+		right: -18vmin;
+		bottom: -22vmin;
+		width: 78vmin;
+		height: 78vmin;
+		color: var(--accent);
+		opacity: 0.045;
+		animation: kamui-turn 140s linear infinite;
+		transition: opacity 0.8s, color 0.5s;
+	}
+	:global(:root[data-mode='sharingan']) .kamui-mark {
+		opacity: 0.1;
+		animation-duration: 70s;
+	}
+	@keyframes kamui-turn {
+		to {
+			transform: rotate(-360deg);
+		}
+	}
+	@media (prefers-reduced-motion: reduce) {
+		.kamui-mark {
+			animation: none;
+		}
+	}
+</style>
+
+<script>
+	const canvas = document.getElementById('chidori') as HTMLCanvasElement | null;
+	const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+	if (canvas && !reduce) {
+		const ctx = canvas.getContext('2d')!;
+		type Pt = [number, number];
+		type Bolt = { paths: { pts: Pt[]; width: number }[]; born: number; life: number };
+		let bolts: Bolt[] = [];
+		let w = 0;
+		let h = 0;
+		let raf = 0;
+		let timer = 0;
+
+		function resize() {
+			const dpr = Math.min(window.devicePixelRatio || 1, 2);
+			w = window.innerWidth;
+			h = window.innerHeight;
+			canvas!.width = w * dpr;
+			canvas!.height = h * dpr;
+			ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+		}
+
+		// Jagged line from a to b by repeated midpoint displacement.
+		function jag(a: Pt, b: Pt, rough: number): Pt[] {
+			let pts: Pt[] = [a, b];
+			let offset = Math.hypot(b[0] - a[0], b[1] - a[1]) * rough;
+			for (let i = 0; i < 6; i++) {
+				const next: Pt[] = [pts[0]];
+				for (let j = 1; j < pts.length; j++) {
+					const p = pts[j - 1];
+					const q = pts[j];
+					const nx = -(q[1] - p[1]);
+					const ny = q[0] - p[0];
+					const len = Math.hypot(nx, ny) || 1;
+					const d = (Math.random() - 0.5) * offset;
+					next.push([(p[0] + q[0]) / 2 + (nx / len) * d, (p[1] + q[1]) / 2 + (ny / len) * d], q);
+				}
+				pts = next;
+				offset *= 0.52;
+			}
+			return pts;
+		}
+
+		function strike() {
+			// Start on an edge, travel a good distance across the viewport.
+			const fromLeft = Math.random() < 0.5;
+			const a: Pt = [fromLeft ? -20 : w + 20, Math.random() * h * 0.7];
+			const reach = (0.35 + Math.random() * 0.5) * w;
+			const b: Pt = [a[0] + (fromLeft ? reach : -reach), a[1] + (Math.random() - 0.3) * h * 0.6];
+			const main = jag(a, b, 0.22);
+			const paths = [{ pts: main, width: 1.4 }];
+			const forks = 2 + Math.floor(Math.random() * 3);
+			for (let i = 0; i < forks; i++) {
+				const start = main[Math.floor((0.15 + Math.random() * 0.7) * main.length)];
+				const ang = Math.atan2(b[1] - a[1], b[0] - a[0]) + (Math.random() - 0.5) * 1.6;
+				const len = (0.08 + Math.random() * 0.16) * w;
+				paths.push({ pts: jag(start, [start[0] + Math.cos(ang) * len, start[1] + Math.sin(ang) * len], 0.3), width: 0.8 });
+			}
+			bolts.push({ paths, born: performance.now(), life: 520 + Math.random() * 260 });
+			if (!raf) raf = requestAnimationFrame(draw);
+		}
+
+		function draw(now: number) {
+			ctx.clearRect(0, 0, w, h);
+			bolts = bolts.filter((b) => now - b.born < b.life);
+			if (!bolts.length) {
+				raf = 0;
+				return;
+			}
+			const rgb = getComputedStyle(document.documentElement).getPropertyValue('--accent-rgb').trim() || '124, 207, 255';
+			ctx.lineJoin = 'round';
+			ctx.lineCap = 'round';
+			for (const bolt of bolts) {
+				const t = (now - bolt.born) / bolt.life;
+				// sharp flash, brief re-strike flicker, then decay
+				const flicker = t < 0.12 ? 1 : t < 0.2 ? 0.25 : t < 0.3 ? 0.8 : 1 - (t - 0.3) / 0.7;
+				const alpha = Math.max(0, flicker) * 0.42;
+				for (const path of bolt.paths) {
+					ctx.beginPath();
+					path.pts.forEach(([x, y], i) => (i ? ctx.lineTo(x, y) : ctx.moveTo(x, y)));
+					ctx.shadowColor = `rgba(${rgb}, ${alpha})`;
+					ctx.shadowBlur = 18;
+					ctx.strokeStyle = `rgba(${rgb}, ${alpha * 0.9})`;
+					ctx.lineWidth = path.width * 2.4;
+					ctx.stroke();
+					ctx.shadowBlur = 0;
+					ctx.strokeStyle = `rgba(255, 255, 255, ${alpha * 0.9})`;
+					ctx.lineWidth = path.width * 0.7;
+					ctx.stroke();
+				}
+			}
+			raf = requestAnimationFrame(draw);
+		}
+
+		function schedule() {
+			timer = window.setTimeout(
+				() => {
+					if (!document.hidden) {
+						strike();
+						if (Math.random() < 0.3) setTimeout(strike, 140 + Math.random() * 200);
+					}
+					schedule();
+				},
+				3200 + Math.random() * 4800,
+			);
+		}
+
+		resize();
+		window.addEventListener('resize', resize);
+		// First strike shortly after load so the effect is discoverable.
+		setTimeout(strike, 900);
+		schedule();
+		// Expose for the mode toggle: a strike punctuates switching modes.
+		document.addEventListener('mode-change', () => strike());
+		window.addEventListener('pagehide', () => clearTimeout(timer));
+	}
+</script>

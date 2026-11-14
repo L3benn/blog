@@ -1,120 +1,223 @@
 ---
-import { SITE_TITLE, GITHUB_URL, LINKEDIN_URL, MEDIUM_URL } from '../consts';
+import { SITE_TITLE } from '../consts';
 import HeaderLink from './HeaderLink.astro';
+import Sharingan from './Sharingan.astro';
 ---
 
-<header>
-	<nav>
-		<a href="/" class="logo">{SITE_TITLE}</a>
-		<div class="nav-links">
+<header class="site-header" id="site-header">
+	<div class="bar">
+		<a href="/" class="logo" aria-label={`${SITE_TITLE} — home`}>{SITE_TITLE}<span>.</span></a>
+
+		<nav class="nav-links" id="nav-links" aria-label="Main">
 			<HeaderLink href="/">Home</HeaderLink>
 			<HeaderLink href="/writeups">Writeups</HeaderLink>
 			<HeaderLink href="/cheatsheets">Cheatsheets</HeaderLink>
 			<HeaderLink href="/certs">Certifications</HeaderLink>
 			<HeaderLink href="/about">About</HeaderLink>
-			<HeaderLink href="/search">Search</HeaderLink>
+		</nav>
+
+		<div class="tools">
+			<button type="button" class="search-btn" data-palette-open aria-label="Search (Ctrl+K)">
+				<svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true"
+					><circle cx="10.5" cy="10.5" r="6.5" fill="none" stroke="currentColor" stroke-width="2"></circle><path
+						d="M15.5 15.5L20.5 20.5"
+						stroke="currentColor"
+						stroke-width="2"
+						stroke-linecap="round"></path></svg
+				>
+				<span>Search</span>
+				<kbd>Ctrl K</kbd>
+			</button>
+			<button type="button" class="mode-btn" data-mode-toggle aria-pressed="false" aria-label="Toggle Sharingan mode" title="Reveal the Sharingan">
+				<Sharingan size={22} />
+			</button>
+			<button type="button" class="menu-btn" data-menu-toggle aria-expanded="false" aria-controls="nav-links" aria-label="Menu">
+				<span></span><span></span>
+			</button>
 		</div>
-		<div class="social-links">
-			<a href={GITHUB_URL} target="_blank" title="GitHub" aria-label="GitHub">
-				<svg viewBox="0 0 16 16" aria-hidden="true" width="20" height="20"
-					><path
-						fill="currentColor"
-						d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.012 8.012 0 0 0 16 8c0-4.42-3.58-8-8-8z"
-					></path></svg
-				>
-			</a>
-			<a href={MEDIUM_URL} target="_blank" title="Medium" aria-label="Medium">
-				<svg viewBox="0 0 16 16" aria-hidden="true" width="20" height="20"
-					><path
-						fill="currentColor"
-						d="M9.025 8c0 2.485-2.02 4.5-4.513 4.5A4.506 4.506 0 0 1 0 8c0-2.486 2.02-4.5 4.512-4.5A4.506 4.506 0 0 1 9.025 8zm4.95 0c0 2.34-1.01 4.236-2.256 4.236S9.463 10.34 9.463 8s1.01-4.236 2.256-4.236S13.975 5.66 13.975 8zM16 8c0 2.096-.355 3.795-.794 3.795-.438 0-.793-1.7-.793-3.795 0-2.096.355-3.795.794-3.795.438 0 .793 1.699.793 3.795z"
-					></path></svg
-				>
-			</a>
-			<a href={LINKEDIN_URL} target="_blank" title="LinkedIn" aria-label="LinkedIn">
-				<svg viewBox="0 0 16 16" aria-hidden="true" width="20" height="20"
-					><path
-						fill="currentColor"
-						d="M0 1.146C0 .513.526 0 1.175 0h13.65C15.474 0 16 .513 16 1.146v13.708c0 .633-.526 1.146-1.175 1.146H1.175C.526 16 0 15.487 0 14.854V1.146zm4.943 12.248V6.169H2.542v7.225h2.401zm-1.2-8.212c.837 0 1.358-.554 1.358-1.248-.015-.709-.52-1.248-1.342-1.248-.822 0-1.359.54-1.359 1.248 0 .694.521 1.248 1.327 1.248h.016zm4.908 8.212V9.359c0-.216.016-.432.08-.586.173-.431.568-.878 1.232-.878.869 0 1.216.662 1.216 1.634v3.865h2.401V9.25c0-2.22-1.184-3.252-2.764-3.252-1.274 0-1.845.7-2.165 1.193v.025h-.016a5.54 5.54 0 0 1 .016-.025V6.169h-2.4c.03.678 0 7.225 0 7.225h2.4z"
-					></path></svg
-				>
-			</a>
-		</div>
-	</nav>
+	</div>
 </header>
+
 <style>
-	header {
-		margin: 0;
-		padding: 0 2em;
-		background: rgba(14, 14, 14, 0.85);
-		backdrop-filter: blur(16px);
-		-webkit-backdrop-filter: blur(16px);
-		position: sticky;
-		top: 0;
+	.site-header {
+		position: fixed;
+		top: 14px;
+		left: 0;
+		right: 0;
 		z-index: 100;
+		padding: 0 var(--gutter);
+		view-transition-name: site-header;
 	}
-	.logo {
-		font-size: 1.1em;
-		font-weight: 700;
-		color: #e0ede6;
-		text-decoration: none;
-		letter-spacing: -0.02em;
-		padding: 0.8em 0;
-		display: block;
-	}
-	.logo:hover {
-		color: #4fc4b8;
-	}
-	nav {
+	.bar {
+		position: relative;
 		display: flex;
 		align-items: center;
-		justify-content: space-between;
-		gap: 1.5em;
-		max-width: 920px;
+		gap: 1rem;
+		max-width: var(--wrap);
 		margin: 0 auto;
+		padding: 0.45rem 0.5rem 0.45rem 1.25rem;
+		background: rgba(12, 13, 17, 0.6);
+		border: 1px solid var(--line);
+		border-radius: 999px;
+		backdrop-filter: blur(18px) saturate(160%);
+		-webkit-backdrop-filter: blur(18px) saturate(160%);
+		transition: background 0.3s, border-color 0.3s, box-shadow 0.3s;
+	}
+	.site-header.scrolled .bar {
+		background: rgba(10, 11, 14, 0.82);
+		border-color: var(--line-strong);
+		box-shadow: 0 12px 40px -16px rgba(0, 0, 0, 0.9);
+	}
+	.logo {
+		font-size: 1.02rem;
+		font-weight: 600;
+		letter-spacing: -0.03em;
+		color: var(--text-strong);
+	}
+	.logo span {
+		color: var(--accent);
 	}
 	.nav-links {
 		display: flex;
-		gap: 0.2em;
+		gap: 0.15rem;
+		margin: 0 auto;
 	}
-	.nav-links a {
-		padding: 0.85em 0.75em;
-		color: #8ab8a8;
-		text-decoration: none;
-		font-size: 0.88em;
-		font-weight: 500;
-		letter-spacing: 0.01em;
-		transition: color 0.2s;
-		border-radius: 0;
+	.nav-links :global(a) {
+		padding: 0.42rem 0.85rem;
+		font-size: 0.875rem;
+		font-weight: 450;
+		color: var(--muted);
+		border-radius: 999px;
+		white-space: nowrap;
+		transition: color 0.2s, background 0.2s;
 	}
-	.nav-links a:hover {
-		color: #e0ede6;
+	.nav-links :global(a:hover) {
+		color: var(--text-strong);
 	}
-	.nav-links a.active {
-		color: #6dd6ca;
+	.nav-links :global(a.active) {
+		color: var(--text-strong);
+		background: rgba(255, 255, 255, 0.08);
 	}
-	.social-links {
-		display: flex;
-		gap: 0.3em;
-	}
-	.social-links a {
+	.tools {
 		display: flex;
 		align-items: center;
+		gap: 0.4rem;
+	}
+	.tools button {
+		display: inline-flex;
+		align-items: center;
 		justify-content: center;
-		padding: 0.5em;
-		color: #8ab8a8;
-		border-radius: 0;
-		transition: all 0.2s;
+		background: none;
+		border: 1px solid transparent;
+		border-radius: 999px;
+		transition: color 0.2s, background 0.2s, border-color 0.2s, box-shadow 0.3s;
 	}
-	.social-links a:hover {
-		color: #4fc4b8;
+	.search-btn {
+		gap: 0.5rem;
+		padding: 0.38rem 0.5rem 0.38rem 0.75rem;
+		font-size: 0.82rem;
+		color: var(--muted);
+		background: rgba(255, 255, 255, 0.04) !important;
+		border-color: var(--line) !important;
 	}
-	@media (max-width: 880px) {
-		header { padding: 0 1em; }
-		.nav-links a { padding: 0.85em 0.5em; font-size: 0.82em; }
+	.search-btn:hover {
+		color: var(--text-strong);
+		border-color: var(--line-strong) !important;
 	}
-	@media (max-width: 640px) {
-		.social-links { display: none; }
-		.nav-links { gap: 0; }
+	.search-btn kbd {
+		border-radius: 999px;
+		padding: 0.1em 0.6em;
+	}
+	.mode-btn {
+		width: 36px;
+		height: 36px;
+	}
+	.mode-btn:hover {
+		background: rgba(255, 255, 255, 0.06);
+	}
+	/* covered eye in Chidori mode, revealed with spinning tomoe in Sharingan mode */
+	.mode-btn :global(.iris) {
+		fill: #454b58;
+		transition: fill 0.4s;
+	}
+	.mode-btn :global(.tomoe) {
+		transition: transform 0.9s var(--ease);
+	}
+	.mode-btn[aria-pressed='true'] {
+		box-shadow: 0 0 18px rgba(255, 90, 95, 0.55);
+	}
+	.mode-btn[aria-pressed='true'] :global(.iris) {
+		fill: #e5383b;
+	}
+	.mode-btn[aria-pressed='true'] :global(.tomoe) {
+		transform: rotate(360deg);
+	}
+	.menu-btn {
+		display: none !important;
+		flex-direction: column;
+		gap: 5px;
+		width: 36px;
+		height: 36px;
+	}
+	.menu-btn span {
+		width: 16px;
+		height: 1.5px;
+		background: var(--text-strong);
+		transition: transform 0.3s var(--ease);
+	}
+	.menu-btn[aria-expanded='true'] span:first-child {
+		transform: translateY(3.25px) rotate(45deg);
+	}
+	.menu-btn[aria-expanded='true'] span:last-child {
+		transform: translateY(-3.25px) rotate(-45deg);
+	}
+
+	@media (max-width: 860px) {
+		.bar {
+			padding-left: 1.1rem;
+		}
+		.logo {
+			margin-right: auto;
+		}
+		.search-btn span,
+		.search-btn kbd {
+			display: none;
+		}
+		.search-btn {
+			width: 36px;
+			height: 36px;
+			padding: 0;
+		}
+		.menu-btn {
+			display: inline-flex !important;
+		}
+		.nav-links {
+			position: absolute;
+			top: calc(100% + 8px);
+			left: 0;
+			right: 0;
+			flex-direction: column;
+			gap: 0;
+			margin: 0;
+			padding: 0.5rem;
+			background: #0d0e12;
+			border: 1px solid var(--line-strong);
+			border-radius: 20px;
+			box-shadow: 0 24px 60px -20px #000;
+			opacity: 0;
+			visibility: hidden;
+			transform: translateY(-6px);
+			transition: opacity 0.25s, transform 0.25s var(--ease), visibility 0.25s;
+		}
+		.site-header.open .nav-links {
+			opacity: 1;
+			visibility: visible;
+			transform: none;
+		}
+		.nav-links :global(a) {
+			padding: 0.8rem 1rem;
+			font-size: 1rem;
+			border-radius: 14px;
+		}
 	}
 </style>

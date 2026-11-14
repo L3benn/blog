@@ -2,148 +2,235 @@
 import BaseHead from '../components/BaseHead.astro';
 import Footer from '../components/Footer.astro';
 import Header from '../components/Header.astro';
-import { GITHUB_URL, LINKEDIN_URL, MEDIUM_URL, EMAIL, SITE_TITLE } from '../consts';
+import PageHeader from '../components/PageHeader.astro';
+import { EMAIL, GITHUB_URL, LINKEDIN_URL, MEDIUM_URL, SITE_TITLE } from '../consts';
+
+const skills = [
+	'Offensive Security & Penetration Testing',
+	'Active Directory & Kerberos Attacks',
+	'Web Application Exploitation',
+	'Red Teaming & Adversary Simulation',
+	'Network & Infrastructure Security',
+	'Vulnerability Assessment & Reporting',
+	'CTF Challenge Authoring',
+	'DevSecOps & CI/CD Security',
+];
+const interests = [
+	'Vulnerability Research',
+	'Reverse Engineering',
+	'Active Directory Security',
+	'Red Teaming',
+	'CTF Competitions',
+];
+const links = [
+	{ label: 'GitHub', value: 'l3benn', href: GITHUB_URL },
+	{ label: 'Medium', value: 'Articles', href: MEDIUM_URL },
+	{ label: 'LinkedIn', value: 'Profile', href: LINKEDIN_URL },
+	{ label: 'Email', value: EMAIL, href: `mailto:${EMAIL}` },
+];
 ---
 
 <!doctype html>
 <html lang="en">
 	<head>
 		<BaseHead title={`About - ${SITE_TITLE}`} description="About Chiheb Mahfoudh" />
-		<style>
-			.about-grid {
-				display: grid;
-				grid-template-columns: 1fr 1fr;
-				gap: 1.5em;
-				margin-top: 1.5em;
-			}
-			.about-card {
-				
-				border-radius: 0;
-				padding: 1.5em;
-			}
-			.about-card h2 {
-				margin: 0 0 0.7em;
-				font-size: 1.1em;
-				color: #e0ede6;
-			}
-			.about-card ul {
-				list-style: none;
-				padding: 0;
-				margin: 0;
-			}
-			.about-card li {
-				padding: 0.35em 0;
-				color: #8ab8a8;
-				font-size: 0.88em;
-				line-height: 1.5;
-			}
-			.about-card li::before {
-				content: '>';
-				color: #4fc4b8;
-				font-weight: 700;
-				margin-right: 0.5em;
-			}
-			.about-card a {
-				color: #4fc4b8;
-				font-weight: 500;
-			}
-			.cert-list {
-				display: flex;
-				flex-wrap: wrap;
-				gap: 0.4em;
-				margin-top: 0.5em;
-			}
-			.social-links {
-				display: flex;
-				flex-wrap: wrap;
-				gap: 0.6em;
-				margin-top: 1.5em;
-			}
-			.social-links a {
-				display: inline-flex;
-				align-items: center;
-				gap: 0.4em;
-				padding: 0.5em 1em;
-				
-				border-radius: 0;
-				color: #8ab8a8;
-				text-decoration: none;
-				font-size: 0.82em;
-				font-weight: 500;
-				transition: background 0.2s;
-			}
-			.social-links a:hover {
-				color: #e0ede6;
-				background: rgba(40, 40, 40, 0.88);
-			}
-			@media (max-width: 700px) {
-				.about-grid { grid-template-columns: 1fr; }
-			}
-		</style>
 	</head>
 	<body>
 		<Header />
 		<main>
-			<h1>About Me</h1>
-			<p>
-				I'm Chiheb Mahfoudh, a Second-year Computer Networks and Telecommunications student
-				at ISETCOM with a strong passion for Offensive Security, Penetration Testing,
-				Active Directory security, and Red Teaming.
-			</p>
-			<p>
-				I hold industry-recognized certifications including <strong>HTB CPTS</strong>,
-				<strong>HTB CWES</strong>, and <strong>CRTP</strong>, with hands-on experience
-				gained through CTF competitions, challenge authoring, enterprise Active Directory labs,
-				and DevSecOps internship experience integrating security into CI/CD pipelines.
-			</p>
-			<p>
-				This blog is where I share writeups, certification journey posts, and cheatsheets
-				covering the topics I work on. I also publish on
-				<a href={GITHUB_URL}>GitHub</a> and <a href={MEDIUM_URL}>Medium</a>.
-			</p>
+			<PageHeader eyebrow="About">
+				Chiheb Mahfoudh, <em>offensive security.</em>
+			</PageHeader>
 
-			<div class="about-grid">
-				<div class="about-card">
-					<h2>Skills & Focus Areas</h2>
-					<ul>
-						<li>Offensive Security & Penetration Testing</li>
-						<li>Active Directory & Kerberos Attacks</li>
-						<li>Web Application Exploitation</li>
-						<li>Red Teaming & Adversary Simulation</li>
-						<li>Network & Infrastructure Security</li>
-						<li>Vulnerability Assessment & Reporting</li>
-						<li>CTF Challenge Authoring</li>
-						<li>DevSecOps & CI/CD Security</li>
-					</ul>
-				</div>
-
-				<div class="about-card">
-					<h2>Certifications</h2>
-					<div class="cert-list">
-						<span class="tag">HTB CPTS</span>
-						<span class="tag">HTB CWES</span>
-						<span class="tag">CRTP</span>
+			<div class="about">
+				<aside class="card profile" data-reveal>
+					<img src="/kakashi.jpg" alt="" width="96" height="96" />
+					<h2>Chiheb Mahfoudh</h2>
+					<p class="role">Cybersecurity student &middot; l3benn</p>
+					<div class="certs">
+						<span class="badge">HTB CPTS</span>
+						<span class="badge">HTB CWES</span>
+						<span class="badge">CRTP</span>
 					</div>
-					<h2 style="margin-top:2.5em">Interests</h2>
-					<ul>
-						<li>Vulnerability Research</li>
-						<li>Reverse Engineering</li>
-						<li>Active Directory Security</li>
-						<li>Red Teaming</li>
-						<li>CTF Competitions</li>
+					<ul class="links">
+						{links.map((l) => (
+							<li>
+								<a href={l.href} target={l.href.startsWith('http') ? '_blank' : undefined} rel="noopener">
+									<span>{l.label}</span>
+									<span class="v">{l.value}</span>
+								</a>
+							</li>
+						))}
 					</ul>
-				</div>
-			</div>
+					<a class="btn cv" href="/CV.pdf" target="_blank">Download CV <span class="arrow" aria-hidden="true">&rarr;</span></a>
+				</aside>
 
-			<h2 style="margin-top:2em">Where to find me</h2>
-			<div class="social-links">
-				<a href={GITHUB_URL} target="_blank">GitHub (l3benn)</a>
-				<a href={MEDIUM_URL} target="_blank">Medium</a>
-				<a href={LINKEDIN_URL} target="_blank">LinkedIn</a>
-				<a href={`mailto:${EMAIL}`}>{EMAIL}</a>
-				<a href="/CV.pdf" target="_blank">Download CV</a>
+				<div class="story">
+					<div class="prose" data-reveal>
+						<p class="intro">
+							I'm Chiheb Mahfoudh, a second-year Computer Networks and Telecommunications student at ISETCOM with a strong
+							passion for Offensive Security, Penetration Testing, Active Directory security, and Red Teaming.
+						</p>
+						<p>
+							I hold industry-recognized certifications including <strong>HTB CPTS</strong>,{' '}
+							<strong>HTB CWES</strong>, and <strong>CRTP</strong>, with hands-on experience gained through CTF competitions,
+							challenge authoring, enterprise Active Directory labs, and DevSecOps internship experience integrating
+							security into CI/CD pipelines.
+						</p>
+						<p>
+							This blog is where I share writeups, certification journey posts, and cheatsheets covering the topics I work
+							on. I also publish on <a href={GITHUB_URL}>GitHub</a> and <a href={MEDIUM_URL}>Medium</a>.
+						</p>
+					</div>
+
+					<section data-reveal>
+						<p class="eyebrow">Skills &amp; focus areas</p>
+						<ol class="skill-list">
+							{skills.map((s, i) => (
+								<li>
+									<span class="idx">{String(i + 1).padStart(2, '0')}</span>
+									{s}
+								</li>
+							))}
+						</ol>
+					</section>
+
+					<section data-reveal>
+						<p class="eyebrow">Interests</p>
+						<div class="interests">
+							{interests.map((s) => <span class="tag">{s}</span>)}
+						</div>
+					</section>
+				</div>
 			</div>
 		</main>
 		<Footer />
+		<style>
+			.about {
+				display: grid;
+				grid-template-columns: 340px minmax(0, 1fr);
+				gap: 4rem;
+				align-items: start;
+			}
+			.profile {
+				position: sticky;
+				top: 6.5rem;
+				padding: 1.8rem;
+			}
+			.profile img {
+				display: block;
+				width: 96px;
+				height: 96px;
+				margin-bottom: 1.3rem;
+				object-fit: cover;
+				border: 1px solid var(--line-strong);
+				border-radius: 50%;
+				box-shadow: 0 0 0 5px rgba(var(--accent-rgb), 0.1);
+			}
+			.profile h2 {
+				margin: 0 0 0.2rem;
+				font-size: 1.3rem;
+			}
+			.role {
+				margin: 0 0 1.1rem;
+				font-size: 0.9rem;
+				color: var(--muted);
+			}
+			.certs {
+				display: flex;
+				flex-wrap: wrap;
+				gap: 0.4rem;
+				margin-bottom: 1.4rem;
+			}
+			.links {
+				margin: 0 0 1.5rem;
+				padding: 0;
+				list-style: none;
+				border-top: 1px solid var(--line);
+			}
+			.links a {
+				display: flex;
+				justify-content: space-between;
+				gap: 1rem;
+				padding: 0.75rem 0;
+				font-size: 0.88rem;
+				color: var(--muted);
+				border-bottom: 1px solid var(--line);
+			}
+			.links .v {
+				min-width: 0;
+				overflow: hidden;
+				text-overflow: ellipsis;
+				white-space: nowrap;
+				color: var(--text-strong);
+				transition: color 0.2s;
+			}
+			.links a:hover .v {
+				color: var(--accent-light);
+			}
+			.cv {
+				width: 100%;
+				justify-content: center;
+			}
+			.story {
+				display: grid;
+				gap: 3.5rem;
+			}
+			.intro {
+				font-size: 1.45rem;
+				line-height: 1.45;
+				letter-spacing: -0.02em;
+				color: var(--text-strong);
+			}
+			.prose p:last-child {
+				margin-bottom: 0;
+			}
+			.skill-list {
+				margin: 0;
+				padding: 0;
+				list-style: none;
+				border-top: 1px solid var(--line);
+			}
+			.skill-list li {
+				display: flex;
+				align-items: baseline;
+				gap: 1.4rem;
+				padding: 0.95rem 0.3rem;
+				font-size: 1.05rem;
+				color: var(--text-strong);
+				border-bottom: 1px solid var(--line);
+				transition: padding 0.35s var(--ease), background 0.3s;
+			}
+			.skill-list li:hover {
+				padding-left: 1rem;
+				background: rgba(255, 255, 255, 0.025);
+			}
+			.idx {
+				font-family: var(--mono);
+				font-size: 0.72rem;
+				color: var(--accent);
+			}
+			.interests {
+				display: flex;
+				flex-wrap: wrap;
+				gap: 0.5rem;
+			}
+			.interests .tag {
+				padding: 0.45em 1em;
+				font-size: 0.8rem;
+			}
+			@media (max-width: 900px) {
+				.about {
+					grid-template-columns: 1fr;
+					gap: 3rem;
+				}
+				.profile {
+					position: static;
+				}
+				.intro {
+					font-size: 1.2rem;
+				}
+			}
+		</style>
 	</body>
 </html>

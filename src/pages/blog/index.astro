@@ -1,188 +1,46 @@
 ---
-import { getCollection } from 'astro:content';
 import BaseHead from '../../components/BaseHead.astro';
 import Footer from '../../components/Footer.astro';
-import FormattedDate from '../../components/FormattedDate.astro';
 import Header from '../../components/Header.astro';
-import Sidebar from '../../components/Sidebar.astro';
-import { SITE_TITLE } from '../../consts';
+import PageHeader from '../../components/PageHeader.astro';
+import PostList from '../../components/PostList.astro';
+import { GITHUB_URL, LINKEDIN_URL, MEDIUM_URL, SITE_TITLE } from '../../consts';
+import { getPosts } from '../../lib/posts';
 
-const posts = (await getCollection('blog')).sort(
-	(a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf(),
-);
-
-function getPostType(tags: string[] = []): { label: string; badgeClass: string } {
-	if (tags.includes('ctf')) return { label: 'CTF', badgeClass: 'badge-writeup' };
-	if (tags.includes('htb')) return { label: 'HTB', badgeClass: 'badge-writeup' };
-	if (tags.includes('cert-journey')) return { label: 'Journey', badgeClass: 'badge-cert' };
-	return { label: 'Writeup', badgeClass: 'badge-article' };
-}
+const posts = await getPosts();
 ---
 
 <!doctype html>
 <html lang="en">
 	<head>
 		<BaseHead title={`Writeups - ${SITE_TITLE}`} description="Security writeups, CTF solutions, and exploit writeups" />
-		<style>
-			.layout {
-				display: grid;
-				grid-template-columns: 1fr 260px;
-				gap: 2em;
-				align-items: start;
-			}
-			.post-list {
-				list-style: none;
-				padding: 0;
-				margin: 0;
-			}
-			.post-item {
-				padding: 1.2em 0;
-			}
-			.post-item:last-child {
-				padding-bottom: 0;
-			}
-			.post-item a {
-				text-decoration: none;
-				color: inherit;
-				display: flex;
-				gap: 1.2em;
-				align-items: flex-start;
-			}
-			.post-item .thumb {
-				width: 220px;
-				height: 150px;
-				border-radius: 0;
-				object-fit: cover;
-				object-position: center;
-				flex-shrink: 0;
-				background: #333333;
-			}
-			.post-item h2 {
-				margin: 0 0 0.3em;
-				font-size: 1.2em;
-				color: #e0ede6;
-				transition: color 0.2s;
-			}
-			.post-item a:hover h2 {
-				color: #4fc4b8;
-			}
-			.meta {
-				color: #8ab8a8;
-				font-size: 0.8em;
-				margin-bottom: 0.4em;
-			}
-			.description {
-				color: #8ab8a8;
-				margin: 0 0 0.5em;
-				font-size: 0.85em;
-				line-height: 1.55;
-			}
-			.tags {
-				display: flex;
-				gap: 0.35em;
-				flex-wrap: wrap;
-			}
-			.post-item .top-row {
-				display: flex;
-				align-items: center;
-				gap: 0.6em;
-				margin-bottom: 0.4em;
-			}
-			.empty-state {
-				text-align: center;
-				padding: 4em 1em;
-				color: #8ab8a8;
-			}
-			.external-sources {
-				margin-top: 3em;
-				padding-top: 2em;
-				border-top: 1px solid rgba(79, 196, 184, 0.08);
-			}
-			.external-sources h2 {
-				margin-bottom: 1em;
-			}
-			.external-sources ul {
-				list-style: none;
-				padding: 0;
-			}
-			.external-sources li {
-				margin-bottom: 0.5em;
-			}
-			.external-sources a {
-				color: #4fc4b8;
-				font-weight: 600;
-			}
-			@media (max-width: 880px) {
-				.layout {
-					grid-template-columns: 1fr;
-				}
-				.post-item a {
-					flex-direction: column;
-				}
-				.post-item .thumb {
-					width: 100%;
-					height: 160px;
-				}
-			}
-		</style>
 	</head>
 	<body>
 		<Header />
 		<main>
-			<h1>Writeups</h1>
-			<p>Security research, CTF solutions, and exploit writeups.</p>
+			<PageHeader eyebrow="Blog" lead="CTF solutions, exploit writeups, and notes from my home lab.">
+				All <em>writeups</em>
+			</PageHeader>
+			<PostList posts={posts} filter empty="No writeups yet." />
 
-			<div class="layout">
-				<div>
-					{posts.length > 0 ? (
-						<ul class="post-list">
-							{posts.map((post) => {
-								const type = getPostType(post.data.tags);
-								return (
-									<li class="post-item">
-										<a href={`/blog/${post.id}/`}>
-											{post.data.thumbnail && <img class="thumb" src={post.data.thumbnail} alt="" loading="lazy" />}
-											<div>
-												<div class="top-row">
-													<span class={"badge " + type.badgeClass}>{type.label}</span>
-													<div class="meta">
-														<FormattedDate date={post.data.pubDate} />
-													</div>
-												</div>
-												<h2>{post.data.title}</h2>
-												<p class="description">{post.data.description}</p>
-												{post.data.tags && post.data.tags.length > 0 && (
-													<div class="tags">
-														{post.data.tags.map((tag) => (
-															<span class="tag">{tag}</span>
-														))}
-													</div>
-												)}
-											</div>
-										</a>
-									</li>
-								);
-							})}
-						</ul>
-					) : (
-						<div class="empty-state">
-							<p>No writeups yet.</p>
-						</div>
-					)}
-
-					<div class="external-sources">
-						<h2>External writeups</h2>
-						<p>I also publish writeups on these platforms:</p>
-						<ul>
-						<li><a href="https://github.com/l3benn" target="_blank">GitHub /l3benn</a></li>
-						<li><a href="https://medium.com/@chiheb.mahfoudh_11384" target="_blank">Medium</a></li>
-						<li><a href="https://www.linkedin.com/in/chiheb-mahfoudh-285917339/" target="_blank">LinkedIn</a></li>
-						</ul>
-					</div>
-				</div>
-				<Sidebar posts={posts} currentPath="/blog/" />
-			</div>
+			<section class="section external" data-reveal>
+				<p class="eyebrow">Elsewhere</p>
+				<p class="lead">
+					I also publish on <a href={GITHUB_URL} target="_blank" rel="noopener">GitHub</a>,
+					<a href={MEDIUM_URL} target="_blank" rel="noopener">Medium</a> and
+					<a href={LINKEDIN_URL} target="_blank" rel="noopener">LinkedIn</a>.
+				</p>
+			</section>
 		</main>
 		<Footer />
+		<style>
+			.external {
+				padding-top: 2.5rem;
+				border-top: 1px solid var(--line);
+			}
+			.external .lead {
+				margin: 0;
+			}
+		</style>
 	</body>
 </html>

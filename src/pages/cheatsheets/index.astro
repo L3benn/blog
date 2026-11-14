@@ -3,15 +3,11 @@ import { getCollection } from 'astro:content';
 import BaseHead from '../../components/BaseHead.astro';
 import Footer from '../../components/Footer.astro';
 import Header from '../../components/Header.astro';
-import Sidebar from '../../components/Sidebar.astro';
+import PageHeader from '../../components/PageHeader.astro';
 import { SITE_TITLE } from '../../consts';
 
 const sheets = (await getCollection('cheatsheets')).sort(
 	(a, b) => (b.data.pubDate?.valueOf() ?? 0) - (a.data.pubDate?.valueOf() ?? 0),
-);
-
-const allPosts = (await getCollection('blog')).sort(
-	(a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf(),
 );
 ---
 
@@ -19,84 +15,89 @@ const allPosts = (await getCollection('blog')).sort(
 <html lang="en">
 	<head>
 		<BaseHead title={`Cheatsheets - ${SITE_TITLE}`} description="Security cheatsheets and quick references" />
-		<style>
-			.layout { display: grid; grid-template-columns: 1fr 260px; gap: 2em; align-items: start; }
-			.sheets-list { list-style: none; padding: 0; margin: 0; }
-			.sheet-item {
-				padding: 1.2em 0;
-			}
-			.sheet-item:last-child { padding-bottom: 0; }
-			.sheet-item a {
-				text-decoration: none;
-				color: inherit;
-				display: flex;
-				gap: 1em;
-				align-items: flex-start;
-			}
-			.sheet-item .cat-badge {
-				background: rgba(79, 196, 184, 0.12);
-				color: #6dd6ca;
-				padding: 0.2em 0.6em;
-				border-radius: 0;
-				font-size: 0.75em;
-				font-weight: 600;
-				flex-shrink: 0;
-				margin-top: 0.2em;
-			}
-			.sheet-item a:hover h2 { color: #4fc4b8; }
-			.sheet-item h2 {
-				margin: 0 0 0.3em;
-				font-size: 1.1em;
-				color: #e0ede6;
-				transition: color 0.2s;
-			}
-			.sheet-item .description {
-				color: #8ab8a8;
-				font-size: 0.85em;
-				line-height: 1.5;
-				margin: 0;
-			}
-			.empty-state {
-				text-align: center;
-				padding: 4em 1em;
-				color: #5a8a7a;
-			}
-			@media (max-width: 880px) {
-				.layout { grid-template-columns: 1fr; }
-			}
-		</style>
 	</head>
 	<body>
 		<Header />
 		<main>
-			<h1>Cheatsheets</h1>
-			<p>Quick references and command cheatsheets for security tools and techniques.</p>
+			<PageHeader eyebrow="Cheatsheets" lead="Quick references and payload tables for security tools and techniques.">
+				Reference, <em>at speed.</em>
+			</PageHeader>
 
-			<div class="layout">
-				<div>
-					{sheets.length > 0 ? (
-						<ul class="sheets-list">
-							{sheets.map((sheet) => (
-								<li class="sheet-item">
-									<a href={`/cheatsheets/${sheet.id}/`}>
-										{sheet.data.category && <span class="cat-badge">{sheet.data.category}</span>}
-										<div>
-											<h2>{sheet.data.title}</h2>
-											<p class="description">{sheet.data.description}</p>
-										</div>
-									</a>
-								</li>
-							))}
-						</ul>
-					) : (
-						<div class="empty-state">
-							<p>No cheatsheets yet.</p>
-						</div>
-					)}
+			{sheets.length > 0 ? (
+				<div class="sheets">
+					{sheets.map((sheet, i) => (
+						<a class="card sheet" href={`/cheatsheets/${sheet.id}/`} data-reveal style={`--i:${i % 3}`}>
+							<div class="top">
+								{sheet.data.category && <span class="badge">{sheet.data.category}</span>}
+								<span class="num">{String(i + 1).padStart(2, '0')}</span>
+							</div>
+							<h2>{sheet.data.title}</h2>
+							<p>{sheet.data.description}</p>
+							<span class="open">Open cheatsheet <span class="arrow" aria-hidden="true">&rarr;</span></span>
+						</a>
+					))}
 				</div>
-				<Sidebar posts={allPosts} />
-			</div>
+			) : (
+				<div class="empty-state">
+					<p>No cheatsheets yet.</p>
+				</div>
+			)}
 		</main>
 		<Footer />
+		<style>
+			.sheets {
+				display: grid;
+				grid-template-columns: repeat(3, minmax(0, 1fr));
+				gap: 1.25rem;
+			}
+			.sheet {
+				display: flex;
+				flex-direction: column;
+				min-height: 260px;
+				padding: 1.6rem 1.7rem;
+			}
+			.top {
+				display: flex;
+				align-items: center;
+				justify-content: space-between;
+				margin-bottom: 2.6rem;
+			}
+			.num {
+				font-family: var(--mono);
+				font-size: 0.75rem;
+				color: var(--faint);
+			}
+			.sheet h2 {
+				margin: 0 0 0.5rem;
+				font-size: 1.3rem;
+			}
+			.sheet p {
+				margin: 0 0 1.6rem;
+				font-size: 0.92rem;
+				line-height: 1.6;
+				color: var(--muted);
+			}
+			.open {
+				display: inline-flex;
+				gap: 0.5em;
+				margin-top: auto;
+				font-size: 0.86rem;
+				font-weight: 500;
+				color: var(--text-strong);
+			}
+			@media (max-width: 980px) {
+				.sheets {
+					grid-template-columns: repeat(2, minmax(0, 1fr));
+				}
+			}
+			@media (max-width: 620px) {
+				.sheets {
+					grid-template-columns: 1fr;
+				}
+				.sheet {
+					min-height: 0;
+				}
+			}
+		</style>
 	</body>
 </html>

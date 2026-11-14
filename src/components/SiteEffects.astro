@@ -1,0 +1,513 @@
+---
+// Site-wide interactive extras. Rendered once per page from <Footer />.
+import BackgroundFX from './BackgroundFX.astro';
+---
+
+<BackgroundFX />
+
+<div id="read-progress" aria-hidden="true"><span></span></div>
+
+<button id="to-top" type="button" aria-label="Back to top" title="Back to top">
+	<svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"
+		><path d="M12 19V5m0 0l-6 6m6-6l6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+		></path></svg
+	>
+</button>
+
+<dialog id="palette" aria-label="Quick navigation">
+	<div class="palette-head">
+		<svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true"
+			><circle cx="10.5" cy="10.5" r="6.5" fill="none" stroke="currentColor" stroke-width="2"></circle><path
+				d="M15.5 15.5L20.5 20.5"
+				stroke="currentColor"
+				stroke-width="2"
+				stroke-linecap="round"></path></svg
+		>
+		<input id="palette-input" type="text" placeholder="Search writeups, cheatsheets, pages…" autocomplete="off" spellcheck="false" />
+		<kbd>esc</kbd>
+	</div>
+	<ul id="palette-list" role="listbox"></ul>
+	<div class="palette-foot">
+		<span><kbd>↑</kbd> <kbd>↓</kbd> navigate</span>
+		<span><kbd>↵</kbd> open</span>
+	</div>
+</dialog>
+
+<div id="mode-flash" aria-hidden="true"></div>
+<div id="kamui" aria-hidden="true"></div>
+
+<style is:global>
+	#read-progress {
+		position: fixed;
+		inset: 0 0 auto 0;
+		height: 2px;
+		z-index: 200;
+		pointer-events: none;
+		display: none;
+	}
+	#read-progress.on {
+		display: block;
+	}
+	#read-progress span {
+		display: block;
+		height: 100%;
+		transform-origin: 0 50%;
+		transform: scaleX(0);
+		background: linear-gradient(90deg, var(--accent-dark), var(--accent-light));
+		box-shadow: 0 0 12px rgba(var(--accent-rgb), 0.8);
+	}
+
+	#to-top {
+		position: fixed;
+		right: 1.5rem;
+		bottom: 1.5rem;
+		z-index: 150;
+		display: grid;
+		place-items: center;
+		width: 42px;
+		height: 42px;
+		padding: 0;
+		color: var(--text-strong);
+		background: rgba(16, 18, 23, 0.8);
+		border: 1px solid var(--line-strong);
+		border-radius: 50%;
+		backdrop-filter: blur(12px);
+		-webkit-backdrop-filter: blur(12px);
+		opacity: 0;
+		transform: translateY(10px);
+		pointer-events: none;
+		transition: opacity 0.3s, transform 0.3s var(--ease), border-color 0.2s, box-shadow 0.3s;
+	}
+	#to-top.show {
+		opacity: 1;
+		transform: none;
+		pointer-events: auto;
+	}
+	#to-top:hover {
+		border-color: rgba(var(--accent-rgb), 0.6);
+		box-shadow: var(--glow);
+	}
+
+	/* command palette */
+	#palette {
+		width: min(620px, calc(100vw - 2rem));
+		margin: 14vh auto auto;
+		padding: 0;
+		color: var(--text);
+		background: rgba(14, 15, 19, 0.92);
+		border: 1px solid var(--line-strong);
+		border-radius: 18px;
+		box-shadow: 0 40px 120px -20px #000, 0 0 0 1px rgba(var(--accent-rgb), 0.12), 0 0 80px -30px rgba(var(--accent-rgb), 0.5);
+		backdrop-filter: blur(24px) saturate(160%);
+		-webkit-backdrop-filter: blur(24px) saturate(160%);
+		overflow: hidden;
+	}
+	#palette[open] {
+		animation: palette-in 0.22s var(--ease);
+	}
+	#palette::backdrop {
+		background: rgba(4, 5, 7, 0.6);
+		backdrop-filter: blur(6px);
+		-webkit-backdrop-filter: blur(6px);
+	}
+	@keyframes palette-in {
+		from {
+			opacity: 0;
+			transform: translateY(-8px) scale(0.98);
+		}
+	}
+	.palette-head {
+		display: flex;
+		align-items: center;
+		gap: 0.8rem;
+		padding: 1rem 1.2rem;
+		color: var(--muted);
+		border-bottom: 1px solid var(--line);
+	}
+	#palette-input {
+		flex: 1;
+		min-width: 0;
+		font: inherit;
+		font-size: 1.02rem;
+		color: var(--text-strong);
+		background: none;
+		border: none;
+		outline: none;
+	}
+	#palette-input::placeholder {
+		color: var(--faint);
+	}
+	#palette-list {
+		list-style: none;
+		margin: 0;
+		padding: 0.5rem;
+		max-height: 46vh;
+		overflow-y: auto;
+	}
+	#palette-list li a {
+		display: flex;
+		align-items: center;
+		gap: 0.9rem;
+		padding: 0.62rem 0.8rem;
+		font-size: 0.94rem;
+		color: var(--text);
+		border-radius: 10px;
+	}
+	#palette-list li[aria-selected='true'] a {
+		color: var(--text-strong);
+		background: rgba(255, 255, 255, 0.07);
+	}
+	#palette-list .p-title {
+		flex: 1;
+		min-width: 0;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+	#palette-list .p-type {
+		flex-shrink: 0;
+		font-family: var(--mono);
+		font-size: 0.64rem;
+		letter-spacing: 0.1em;
+		text-transform: uppercase;
+		color: var(--faint);
+	}
+	#palette-list li[aria-selected='true'] .p-type {
+		color: var(--accent);
+	}
+	#palette-list .p-empty {
+		padding: 1.4rem 0.8rem;
+		color: var(--muted);
+		font-size: 0.94rem;
+	}
+	.palette-foot {
+		display: flex;
+		gap: 1.4rem;
+		padding: 0.7rem 1.2rem;
+		font-size: 0.76rem;
+		color: var(--faint);
+		border-top: 1px solid var(--line);
+	}
+
+	/* accent wash when switching mode, centred on the toggle */
+	#mode-flash {
+		position: fixed;
+		inset: 0;
+		z-index: 350;
+		pointer-events: none;
+		opacity: 0;
+		background: radial-gradient(circle at var(--fx, 50%) var(--fy, 0%), rgba(var(--accent-rgb), 0.3), transparent 55%);
+	}
+	#mode-flash.go {
+		animation: mode-flash 0.7s ease-out;
+	}
+	@keyframes mode-flash {
+		from {
+			opacity: 1;
+		}
+		to {
+			opacity: 0;
+		}
+	}
+
+	/* hidden extra: type "kamui" */
+	#kamui {
+		position: fixed;
+		inset: 0;
+		z-index: 400;
+		pointer-events: none;
+		opacity: 0;
+		background:
+			repeating-conic-gradient(from 0deg at 50% 50%, rgba(var(--accent-rgb), 0.22) 0 6deg, transparent 6deg 24deg),
+			radial-gradient(circle at 50% 50%, #000 0 6%, transparent 55%);
+	}
+	html.kamui #kamui {
+		animation: kamui-swirl 1.8s ease-in-out;
+	}
+	html.kamui main {
+		animation: kamui-warp 1.8s cubic-bezier(0.6, 0, 0.4, 1);
+	}
+	@keyframes kamui-swirl {
+		0% { opacity: 0; transform: rotate(0) scale(2.2); }
+		45%, 55% { opacity: 1; }
+		100% { opacity: 0; transform: rotate(540deg) scale(2.2); }
+	}
+	@keyframes kamui-warp {
+		0%, 100% { transform: none; filter: none; }
+		50% { transform: scale(0.02) rotate(360deg); filter: blur(6px); }
+	}
+
+	@media (max-width: 640px) {
+		.palette-foot {
+			display: none;
+		}
+		#to-top {
+			right: 1rem;
+			bottom: 1rem;
+		}
+	}
+</style>
+
+<script>
+	const root = document.documentElement;
+	const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+	/* ── Chidori / Sharingan mode ─────────────────────────────── */
+	const flash = document.getElementById('mode-flash')!;
+	function setMode(mode: string, origin?: HTMLElement | null) {
+		root.dataset.mode = mode;
+		try {
+			localStorage.setItem('mode', mode);
+		} catch {}
+		document.querySelectorAll<HTMLElement>('[data-mode-toggle]').forEach((btn) => {
+			btn.setAttribute('aria-pressed', String(mode === 'sharingan'));
+			btn.title = mode === 'sharingan' ? 'Cover the Sharingan' : 'Reveal the Sharingan';
+		});
+		if (origin && !reduceMotion) {
+			const r = origin.getBoundingClientRect();
+			flash.style.setProperty('--fx', `${r.left + r.width / 2}px`);
+			flash.style.setProperty('--fy', `${r.top + r.height / 2}px`);
+			flash.classList.remove('go');
+			void flash.offsetWidth;
+			flash.classList.add('go');
+			document.dispatchEvent(new Event('mode-change'));
+		}
+	}
+	const toggleMode = (origin?: HTMLElement | null) =>
+		setMode(root.dataset.mode === 'sharingan' ? 'chidori' : 'sharingan', origin);
+
+	setMode(root.dataset.mode || 'chidori');
+	document.querySelectorAll<HTMLElement>('[data-mode-toggle]').forEach((btn) => {
+		btn.addEventListener('click', () => toggleMode(btn));
+	});
+
+	/* ── Header: condense on scroll, mobile menu ──────────────── */
+	const header = document.getElementById('site-header');
+	const menuBtn = document.querySelector<HTMLElement>('[data-menu-toggle]');
+	function setMenu(open: boolean) {
+		header?.classList.toggle('open', open);
+		menuBtn?.setAttribute('aria-expanded', String(open));
+	}
+	menuBtn?.addEventListener('click', () => setMenu(!header?.classList.contains('open')));
+	document.addEventListener('click', (e) => {
+		if (header?.classList.contains('open') && !header.contains(e.target as Node)) setMenu(false);
+	});
+
+	/* ── Reading progress + back to top ───────────────────────── */
+	const progress = document.getElementById('read-progress')!;
+	const bar = progress.querySelector('span')!;
+	const toTop = document.getElementById('to-top')!;
+	const article = document.querySelector('article');
+	if (article) progress.classList.add('on');
+
+	let ticking = false;
+	function onScroll() {
+		if (ticking) return;
+		ticking = true;
+		requestAnimationFrame(() => {
+			const y = window.scrollY;
+			const max = root.scrollHeight - window.innerHeight;
+			if (article) bar.style.transform = `scaleX(${max > 0 ? Math.min(1, y / max) : 0})`;
+			toTop.classList.toggle('show', y > 700);
+			header?.classList.toggle('scrolled', y > 24);
+			ticking = false;
+		});
+	}
+	window.addEventListener('scroll', onScroll, { passive: true });
+	onScroll();
+	toTop.addEventListener('click', () => window.scrollTo({ top: 0, behavior: reduceMotion ? 'auto' : 'smooth' }));
+
+	/* ── Scroll reveal ────────────────────────────────────────── */
+	const revealEls = document.querySelectorAll<HTMLElement>('[data-reveal]');
+	if (reduceMotion || !('IntersectionObserver' in window)) {
+		revealEls.forEach((el) => el.classList.add('in'));
+	} else {
+		const io = new IntersectionObserver(
+			(entries) => {
+				for (const entry of entries) {
+					if (!entry.isIntersecting) continue;
+					entry.target.classList.add('in');
+					io.unobserve(entry.target);
+				}
+			},
+			{ rootMargin: '0px 0px -8% 0px', threshold: 0.05 },
+		);
+		revealEls.forEach((el) => io.observe(el));
+	}
+
+	/* ── Card spotlight follows the cursor ────────────────────── */
+	if (window.matchMedia('(hover: hover)').matches) {
+		document.addEventListener(
+			'pointermove',
+			(e) => {
+				const card = (e.target as HTMLElement).closest?.<HTMLElement>('.card');
+				if (!card) return;
+				const r = card.getBoundingClientRect();
+				card.style.setProperty('--mx', `${e.clientX - r.left}px`);
+				card.style.setProperty('--my', `${e.clientY - r.top}px`);
+			},
+			{ passive: true },
+		);
+	}
+
+	/* ── Wide tables scroll sideways instead of squashing ─────── */
+	document.querySelectorAll<HTMLTableElement>('.prose table').forEach((table) => {
+		const wrap = document.createElement('div');
+		wrap.className = 'table-wrap';
+		table.replaceWith(wrap);
+		wrap.appendChild(table);
+	});
+
+	/* ── Copy buttons on code blocks ──────────────────────────── */
+	document.querySelectorAll<HTMLPreElement>('.prose pre').forEach((pre) => {
+		const btn = document.createElement('button');
+		btn.type = 'button';
+		btn.className = 'copy-btn';
+		btn.textContent = 'Copy';
+		btn.addEventListener('click', async () => {
+			const code = pre.querySelector('code')?.innerText ?? '';
+			try {
+				await navigator.clipboard.writeText(code);
+				btn.textContent = 'Copied';
+				btn.classList.add('copied');
+			} catch {
+				btn.textContent = 'Failed';
+			}
+			setTimeout(() => {
+				btn.textContent = 'Copy';
+				btn.classList.remove('copied');
+			}, 1500);
+		});
+		pre.appendChild(btn);
+	});
+
+	/* ── Command palette (Ctrl/⌘+K or /) ──────────────────────── */
+	type Item = { title: string; url: string; type: string; extra: string };
+	const palette = document.getElementById('palette') as HTMLDialogElement;
+	const pInput = document.getElementById('palette-input') as HTMLInputElement;
+	const pList = document.getElementById('palette-list')!;
+	let items: Item[] | null = null;
+	let shown: Item[] = [];
+	let sel = 0;
+
+	function renderPalette() {
+		const terms = pInput.value.trim().toLowerCase().split(/\s+/).filter(Boolean);
+		shown = (items ?? [])
+			.map((it) => {
+				const title = it.title.toLowerCase();
+				const hay = `${title} ${it.type.toLowerCase()} ${it.extra.toLowerCase()}`;
+				if (!terms.every((t) => hay.includes(t))) return null;
+				const score = terms.reduce((n, t) => n + (title.startsWith(t) ? 3 : title.includes(t) ? 2 : 1), 0);
+				return { it, score };
+			})
+			.filter((x): x is { it: Item; score: number } => x !== null)
+			.sort((a, b) => b.score - a.score)
+			.slice(0, 12)
+			.map((x) => x.it);
+		sel = Math.min(sel, Math.max(0, shown.length - 1));
+		pList.replaceChildren();
+		if (!shown.length) {
+			const li = document.createElement('li');
+			li.className = 'p-empty';
+			li.textContent = items ? 'No results.' : 'Loading…';
+			pList.appendChild(li);
+			return;
+		}
+		shown.forEach((it, i) => {
+			const li = document.createElement('li');
+			li.setAttribute('role', 'option');
+			li.setAttribute('aria-selected', String(i === sel));
+			const a = document.createElement('a');
+			a.href = it.url;
+			const title = document.createElement('span');
+			title.className = 'p-title';
+			title.textContent = it.title;
+			const type = document.createElement('span');
+			type.className = 'p-type';
+			type.textContent = it.type;
+			a.append(title, type);
+			li.appendChild(a);
+			li.addEventListener('pointermove', () => {
+				if (sel !== i) {
+					sel = i;
+					markSelected(false);
+				}
+			});
+			pList.appendChild(li);
+		});
+	}
+	function markSelected(scroll = true) {
+		Array.from(pList.children).forEach((li, i) => {
+			li.setAttribute('aria-selected', String(i === sel));
+			if (scroll && i === sel) li.scrollIntoView({ block: 'nearest' });
+		});
+	}
+	async function openPalette() {
+		if (palette.open) return;
+		setMenu(false);
+		pInput.value = '';
+		sel = 0;
+		palette.showModal();
+		renderPalette();
+		if (!items) {
+			try {
+				items = await (await fetch('/search.json')).json();
+			} catch {
+				items = [];
+			}
+			renderPalette();
+		}
+	}
+	pInput.addEventListener('input', () => {
+		sel = 0;
+		renderPalette();
+	});
+	pInput.addEventListener('keydown', (e) => {
+		if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+			e.preventDefault();
+			if (!shown.length) return;
+			sel = (sel + (e.key === 'ArrowDown' ? 1 : -1) + shown.length) % shown.length;
+			markSelected();
+		} else if (e.key === 'Enter' && shown[sel]) {
+			e.preventDefault();
+			window.location.href = shown[sel].url;
+		}
+	});
+	palette.addEventListener('click', (e) => {
+		if (e.target === palette) palette.close();
+	});
+	document.querySelectorAll('[data-palette-open]').forEach((el) => el.addEventListener('click', openPalette));
+
+	/* ── Keyboard: shortcuts + hidden "kamui" ─────────────────── */
+	let typed = '';
+	function kamui() {
+		if (reduceMotion || root.classList.contains('kamui')) return;
+		root.classList.add('kamui');
+		setTimeout(() => root.classList.remove('kamui'), 1850);
+	}
+	window.addEventListener('keydown', (e) => {
+		if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
+			e.preventDefault();
+			palette.open ? palette.close() : openPalette();
+			return;
+		}
+		const t = e.target as HTMLElement;
+		const typing = t.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName);
+		if (typing || e.ctrlKey || e.metaKey || e.altKey) return;
+		if (e.key === 'Escape') setMenu(false);
+		if (e.key === '/') {
+			e.preventDefault();
+			openPalette();
+			return;
+		}
+		if (e.key.length === 1) {
+			typed = (typed + e.key.toLowerCase()).slice(-5);
+			if (typed === 'kamui') {
+				typed = '';
+				kamui();
+				return;
+			}
+		}
+		if (e.key === 's') toggleMode(document.querySelector<HTMLElement>('[data-mode-toggle]'));
+	});
+</script>

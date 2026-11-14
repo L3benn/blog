@@ -1,97 +1,351 @@
 ---
-import { Image } from 'astro:assets';
-import type { CollectionEntry } from 'astro:content';
+import type { MarkdownHeading } from 'astro';
 import BaseHead from '../components/BaseHead.astro';
 import Footer from '../components/Footer.astro';
 import FormattedDate from '../components/FormattedDate.astro';
 import Header from '../components/Header.astro';
 
-type Props = CollectionEntry<'blog'>['data'];
+type PostLink = { title: string; href: string };
+interface Props {
+	title: string;
+	description?: string;
+	pubDate?: Date;
+	updatedDate?: Date;
+	tags?: string[];
+	headings?: MarkdownHeading[];
+	minutes?: number;
+	back?: { href: string; label: string };
+	newer?: PostLink;
+	older?: PostLink;
+}
 
-const { title, description, pubDate, updatedDate, heroImage, tags } = Astro.props;
+const {
+	title,
+	description = '',
+	pubDate,
+	updatedDate,
+	tags = [],
+	headings = [],
+	minutes,
+	back = { href: '/writeups', label: 'Writeups' },
+	newer,
+	older,
+} = Astro.props;
+const toc = headings.filter((h) => h.depth === 2 || h.depth === 3);
+const hasToc = toc.length >= 3;
 ---
 
 <html lang="en">
 	<head>
 		<BaseHead title={title} description={description} />
-		<style>
-			article {
-				max-width: 880px;
-				margin: 0 auto;
-			}
-			.title {
-				margin-bottom: 1em;
-				padding: 1em 0;
-				text-align: center;
-				line-height: 1;
-			}
-			.title h1 {
-				margin: 0 0 0.5em 0;
-				font-size: 2.2em;
-			}
-			.date {
-				margin-bottom: 0.5em;
-				color: #8ab8a8;
-				font-size: 0.9em;
-			}
-			.last-updated-on {
-				font-style: italic;
-			}
-			.tags {
-				display: flex;
-				gap: 0.5em;
-				justify-content: center;
-				flex-wrap: wrap;
-				margin-bottom: 1em;
-			}
-			.tag {
-				background: rgba(79, 196, 184, 0.1);
-				color: #6dd6ca;
-				padding: 0.2em 0.6em;
-				border-radius: 0;
-				font-size: 0.78em;
-				font-weight: 500;
-			}
-			.prose img {
-				width: 100%;
-				height: auto;
-				margin: 1.5em 0;
-				border-radius: 0;
-			}
-		</style>
 	</head>
 
 	<body>
 		<Header />
 		<main>
-			<article>
-				{heroImage && <Image width={1020} height={510} src={heroImage} alt="" />}
-				<div class="prose">
-					<div class="title">
-						<div class="date">
-							<FormattedDate date={pubDate} />
-							{
-								updatedDate && (
-									<div class="last-updated-on">
-										Last updated on <FormattedDate date={updatedDate} />
-									</div>
-								)
-							}
-						</div>
-						{tags && tags.length > 0 && (
-							<div class="tags">
-								{tags.map((tag) => (
-									<span class="tag">{tag}</span>
-								))}
-							</div>
-						)}
-						<h1>{title}</h1>
-						<hr />
+			<header class="post-head">
+				<a class="link-arrow back" href={back.href}><span aria-hidden="true">&larr;</span> {back.label}</a>
+				<p class="meta">
+					{pubDate && <FormattedDate date={pubDate} />}
+					{minutes && <span>{minutes} min read</span>}
+					{updatedDate && (
+						<span>
+							Updated <FormattedDate date={updatedDate} />
+						</span>
+					)}
+				</p>
+				<h1>{title}</h1>
+				{description && <p class="lead">{description}</p>}
+				{tags.length > 0 && (
+					<div class="tags">
+						{tags.map((tag) => (
+							<span class="tag">{tag}</span>
+						))}
 					</div>
+				)}
+			</header>
+
+			<div class:list={['post-grid', { 'with-toc': hasToc }]}>
+				<article class="prose">
 					<slot />
-				</div>
-			</article>
+				</article>
+
+				{hasToc && (
+					<aside class="toc">
+						<details open>
+							<summary>On this page</summary>
+							<ol>
+								{toc.map((h) => (
+									<li class={`d${h.depth}`}>
+										<a href={`#${h.slug}`}>{h.text}</a>
+									</li>
+								))}
+							</ol>
+						</details>
+					</aside>
+				)}
+			</div>
+
+			{(newer || older) && (
+				<nav class="post-nav" aria-label="More">
+					{older ? (
+						<a class="card" href={older.href}>
+							<span class="dir"><span class="arrow-l" aria-hidden="true">&larr;</span> Older</span>
+							<span class="t">{older.title}</span>
+						</a>
+					) : (
+						<span />
+					)}
+					{newer && (
+						<a class="card next" href={newer.href}>
+							<span class="dir">Newer <span class="arrow" aria-hidden="true">&rarr;</span></span>
+							<span class="t">{newer.title}</span>
+						</a>
+					)}
+				</nav>
+			)}
 		</main>
 		<Footer />
+
+		<style>
+			main {
+				--measure: 720px;
+			}
+			.post-head {
+				max-width: 860px;
+				margin: 0 auto 3.5rem;
+				padding-bottom: 2.5rem;
+				border-bottom: 1px solid var(--line);
+				animation: head-in 0.8s var(--ease) both;
+			}
+			@keyframes head-in {
+				from {
+					opacity: 0;
+					transform: translateY(14px);
+				}
+			}
+			.back {
+				display: flex;
+				width: fit-content;
+				margin-bottom: 2.2rem;
+			}
+			.meta {
+				display: flex;
+				flex-wrap: wrap;
+				gap: 0.4rem 1.2rem;
+				margin: 0 0 1.2rem;
+				font-family: var(--mono);
+				font-size: 0.74rem;
+				letter-spacing: 0.06em;
+				text-transform: uppercase;
+				color: var(--muted);
+			}
+			.meta > * + *::before {
+				content: '/';
+				margin-right: 1.2rem;
+				color: var(--accent);
+			}
+			.post-head h1 {
+				margin: 0;
+				font-size: clamp(2.1rem, 5vw, 3.5rem);
+			}
+			.post-head .lead {
+				margin: 1.3rem 0 0;
+				font-size: 1.2rem;
+			}
+			.tags {
+				display: flex;
+				flex-wrap: wrap;
+				gap: 0.4rem;
+				margin-top: 1.6rem;
+			}
+
+			.post-grid {
+				max-width: 860px;
+				margin: 0 auto;
+			}
+			.prose {
+				min-width: 0;
+				max-width: var(--measure);
+			}
+
+			.toc summary {
+				margin-bottom: 0.9rem;
+				font-family: var(--mono);
+				font-size: 0.68rem;
+				letter-spacing: 0.14em;
+				text-transform: uppercase;
+				color: var(--faint);
+				list-style: none;
+			}
+			.toc summary::-webkit-details-marker {
+				display: none;
+			}
+			.toc ol {
+				margin: 0;
+				padding: 0;
+				list-style: none;
+				border-left: 1px solid var(--line);
+			}
+			.toc a {
+				display: block;
+				margin-left: -1px;
+				padding: 0.32rem 0 0.32rem 1rem;
+				font-size: 0.84rem;
+				line-height: 1.4;
+				color: var(--muted);
+				border-left: 1px solid transparent;
+				transition: color 0.2s, border-color 0.2s;
+			}
+			.toc .d3 a {
+				padding-left: 1.9rem;
+			}
+			.toc a:hover {
+				color: var(--text-strong);
+			}
+			.toc a.current {
+				color: var(--accent-light);
+				border-left-color: var(--accent);
+			}
+
+			/* wide: sticky contents rail beside the article */
+			@media (min-width: 1081px) {
+				.with-toc {
+					display: grid;
+					grid-template-columns: minmax(0, var(--measure)) 230px;
+					justify-content: space-between;
+					gap: 4rem;
+					max-width: var(--wrap);
+				}
+				.with-toc ~ .post-nav,
+				main:has(.with-toc) .post-head {
+					max-width: var(--wrap);
+				}
+				.toc {
+					position: sticky;
+					top: 6.5rem;
+					align-self: start;
+					max-height: calc(100vh - 9rem);
+					overflow-y: auto;
+				}
+				.toc summary {
+					pointer-events: none;
+				}
+			}
+			/* narrow: collapsible contents box above the article */
+			@media (max-width: 1080px) {
+				.post-grid {
+					display: flex;
+					flex-direction: column;
+				}
+				.toc {
+					order: -1;
+					margin-bottom: 2.5rem;
+					padding: 1rem 1.2rem;
+					background: var(--card-bg);
+					border: 1px solid var(--line);
+					border-radius: var(--radius-sm);
+				}
+				.toc summary {
+					display: flex;
+					justify-content: space-between;
+					margin: 0;
+					cursor: pointer;
+				}
+				.toc summary::after {
+					content: '+';
+					font-size: 1rem;
+				}
+				.toc details[open] summary {
+					margin-bottom: 0.9rem;
+				}
+				.toc details[open] summary::after {
+					content: '–';
+				}
+			}
+
+			.post-nav {
+				display: grid;
+				grid-template-columns: 1fr 1fr;
+				gap: 1.25rem;
+				max-width: 860px;
+				margin: 5rem auto 0;
+				padding-top: 2.5rem;
+				border-top: 1px solid var(--line);
+			}
+			.post-nav a {
+				display: flex;
+				flex-direction: column;
+				gap: 0.6rem;
+				padding: 1.3rem 1.5rem;
+			}
+			.post-nav .next {
+				text-align: right;
+				align-items: flex-end;
+			}
+			.dir {
+				font-family: var(--mono);
+				font-size: 0.68rem;
+				letter-spacing: 0.12em;
+				text-transform: uppercase;
+				color: var(--faint);
+			}
+			.arrow-l {
+				display: inline-block;
+				transition: transform 0.25s var(--ease);
+			}
+			.post-nav a:hover .arrow-l {
+				transform: translateX(-4px);
+			}
+			.t {
+				font-size: 1.02rem;
+				font-weight: 500;
+				line-height: 1.35;
+				letter-spacing: -0.015em;
+				color: var(--text-strong);
+			}
+			@media (max-width: 640px) {
+				.post-nav {
+					grid-template-columns: 1fr;
+				}
+				.post-nav > span:empty {
+					display: none;
+				}
+			}
+		</style>
+
+		<script>
+			// Collapse the contents box on narrow screens; highlight the current section on wide ones.
+			const details = document.querySelector<HTMLDetailsElement>('.toc details');
+			if (details && window.matchMedia('(max-width: 1080px)').matches) details.open = false;
+
+			const links = Array.from(document.querySelectorAll<HTMLAnchorElement>('.toc a'));
+			const byId = new Map(links.map((a) => [decodeURIComponent(a.hash.slice(1)), a]));
+			const heads = Array.from(document.querySelectorAll<HTMLElement>('.prose h2[id], .prose h3[id]')).filter((h) =>
+				byId.has(h.id),
+			);
+			if (heads.length) {
+				let queued = false;
+				const update = () => {
+					queued = false;
+					let current: HTMLElement | null = null;
+					for (const h of heads) {
+						if (h.getBoundingClientRect().top <= 140) current = h;
+					}
+					links.forEach((a) => a.classList.toggle('current', !!current && a === byId.get(current.id)));
+				};
+				window.addEventListener(
+					'scroll',
+					() => {
+						if (!queued) {
+							queued = true;
+							requestAnimationFrame(update);
+						}
+					},
+					{ passive: true },
+				);
+				update();
+			}
+		</script>
 	</body>
 </html>

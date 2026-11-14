@@ -4,6 +4,7 @@ import BaseHead from '../components/BaseHead.astro';
 import Footer from '../components/Footer.astro';
 import FormattedDate from '../components/FormattedDate.astro';
 import Header from '../components/Header.astro';
+import PageHeader from '../components/PageHeader.astro';
 import { SITE_TITLE } from '../consts';
 
 const certs = (await getCollection('certs')).sort(
@@ -15,142 +16,48 @@ const certs = (await getCollection('certs')).sort(
 <html lang="en">
 	<head>
 		<BaseHead title={`Certifications - ${SITE_TITLE}`} description="My professional certifications" />
-		<style>
-			.cert-grid {
-				display: grid;
-				grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
-				gap: 1.5em;
-				margin-top: 1.5em;
-			}
-			.cert-card {
-				padding: 1.5em;
-				backdrop-filter: blur(12px);
-				-webkit-backdrop-filter: blur(12px);
-				border-radius: 0;
-				display: flex;
-				flex-direction: column;
-				align-items: center;
-				overflow: hidden;
-				transition: background 0.2s;
-			}
-			.cert-card:hover {
-				background: rgba(40, 40, 40, 0.88);
-			}
-			.cert-card .badge {
-				width: 100%;
-				height: 300px;
-				object-fit: cover;
-				object-position: center;
-				display: block;
-				margin-bottom: 1em;
-				background: #1a1a1a;
-			}
-			.cert-card h3 {
-				margin: 0 0 0.3em;
-				font-size: 1.1em;
-				color: #e0ede6;
-			}
-			.cert-card .issuer {
-				color: #8ab8a8;
-				font-size: 0.85em;
-				margin-bottom: 0.5em;
-			}
-			.cert-card .date {
-				color: #5a8a7a;
-				font-size: 0.8em;
-				margin-bottom: 0.7em;
-			}
-			.cert-card .desc {
-				color: #b8d4c8;
-				font-size: 0.9em;
-				line-height: 1.5;
-				margin-bottom: 0.7em;
-				flex: 1;
-			}
-			.skills {
-				display: flex;
-				flex-wrap: wrap;
-				gap: 0.4em;
-				margin-bottom: 1em;
-			}
-			.skill {
-				background: rgba(79, 196, 184, 0.12);
-				color: #6dd6ca;
-				padding: 0.2em 0.6em;
-				border-radius: 0;
-				font-size: 0.75em;
-			}
-			.verify-link {
-				display: inline-flex;
-				align-items: center;
-				gap: 0.4em;
-				color: #4fc4b8;
-				text-decoration: none;
-				font-weight: 600;
-				font-size: 0.85em;
-			}
-			.verify-link:hover {
-				color: #6dd6ca;
-				text-decoration: underline;
-			}
-
-			.journey-btn {
-				display: inline-flex;
-				align-items: center;
-				gap: 0.6em;
-				padding: 0.65em 1.5em;
-				background: #4fc4b8;
-				color: #081c18;
-				border-radius: 0;
-				font-size: 0.9em;
-				font-weight: 600;
-				text-decoration: none;
-				transition: background 0.2s;
-			}
-			.journey-btn:hover {
-				background: #6dd6ca;
-				color: #081c18;
-			}
-			.empty-state {
-				text-align: center;
-				padding: 3em 1em;
-				color: #8ab8a8;
-			}
-		</style>
 	</head>
 	<body>
 		<Header />
 		<main>
-			<div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1em;margin-bottom:1.5em">
-				<div>
-					<h1 style="margin:0">Certifications</h1>
-					<p style="margin:0.3em 0 0">Professional certifications I've earned, along with my journey preparing for each one.</p>
-				</div>
-				<a class="journey-btn" href="/certs/journeys/">
-					View all journeys &rarr;
+			<PageHeader eyebrow="Certifications" lead="Professional certifications I've earned, along with my journey preparing for each one.">
+				Earned, <em>not given.</em>
+				<a slot="actions" class="btn btn-ghost" href="/certs/journeys/">
+					Read the journeys <span class="arrow" aria-hidden="true">&rarr;</span>
 				</a>
-			</div>
+			</PageHeader>
 
 			{certs.length > 0 ? (
 				<div class="cert-grid">
-					{certs.map((cert) => (
-						<div class="cert-card">
-							{cert.data.badgeImage && <img class="badge" src={cert.data.badgeImage} alt={`${cert.data.title} badge`} />}
-							<h3>{cert.data.title}</h3>
-							<div class="issuer">{cert.data.issuer}</div>
-							<div class="date">Earned <FormattedDate date={cert.data.dateEarned} /></div>
-							{cert.data.description && <p class="desc">{cert.data.description}</p>}
-							{cert.data.skills.length > 0 && (
-								<div class="skills">
-									{cert.data.skills.map((s) => <span class="skill">{s}</span>)}
+					{certs.map((cert, i) => (
+						<article class="card hoverable cert" data-reveal style={`--i:${i % 2}`}>
+							{cert.data.badgeImage && (
+								<div class="shot">
+									<img src={cert.data.badgeImage} alt={`${cert.data.title} certificate`} loading="lazy" decoding="async" />
 								</div>
 							)}
-							{cert.data.verifyUrl && (
-								<a class="verify-link" href={cert.data.verifyUrl} target="_blank">
-									Verify credential &nearr;
-								</a>
-							)}
-						</div>
+							<div class="body">
+								<p class="meta">
+									<span>{cert.data.issuer}</span>
+									<FormattedDate date={cert.data.dateEarned} />
+								</p>
+								<h2>{cert.data.title}</h2>
+								{cert.data.description && <p class="desc">{cert.data.description}</p>}
+								{cert.data.skills.length > 0 && (
+									<details>
+										<summary>{cert.data.skills.length} skills covered</summary>
+										<div class="skills">
+											{cert.data.skills.map((s) => <span class="tag">{s}</span>)}
+										</div>
+									</details>
+								)}
+								{cert.data.verifyUrl && (
+									<a class="link-arrow verify" href={cert.data.verifyUrl} target="_blank" rel="noopener">
+										Verify credential <span class="arrow" aria-hidden="true">&nearr;</span>
+									</a>
+								)}
+							</div>
+						</article>
 					))}
 				</div>
 			) : (
@@ -158,9 +65,109 @@ const certs = (await getCollection('certs')).sort(
 					<p>No certifications added yet.</p>
 				</div>
 			)}
-
-
 		</main>
 		<Footer />
+		<style>
+			.cert-grid {
+				display: grid;
+				grid-template-columns: repeat(2, minmax(0, 1fr));
+				gap: 1.25rem;
+				align-items: start;
+			}
+			.cert {
+				display: flex;
+				flex-direction: column;
+			}
+			.shot {
+				aspect-ratio: 16 / 10;
+				overflow: hidden;
+				background: var(--surface-2);
+				border-bottom: 1px solid var(--line);
+			}
+			.shot img {
+				width: 100%;
+				height: 100%;
+				object-fit: cover;
+				transition: transform 0.9s var(--ease);
+			}
+			.cert:hover .shot img {
+				transform: scale(1.03);
+			}
+			.body {
+				padding: 1.6rem 1.7rem 1.5rem;
+			}
+			.meta {
+				display: flex;
+				justify-content: space-between;
+				gap: 1rem;
+				margin: 0 0 0.9rem;
+				font-family: var(--mono);
+				font-size: 0.72rem;
+				letter-spacing: 0.06em;
+				text-transform: uppercase;
+				color: var(--faint);
+			}
+			.meta span {
+				color: var(--accent);
+			}
+			.cert h2 {
+				margin: 0 0 0.7rem;
+				font-size: 1.35rem;
+				line-height: 1.2;
+			}
+			.desc {
+				margin: 0 0 1.3rem;
+				font-size: 0.94rem;
+				line-height: 1.6;
+				color: var(--muted);
+			}
+			details {
+				margin-bottom: 1.3rem;
+				border-top: 1px solid var(--line);
+				border-bottom: 1px solid var(--line);
+			}
+			summary {
+				display: flex;
+				align-items: center;
+				justify-content: space-between;
+				padding: 0.8rem 0;
+				font-size: 0.88rem;
+				font-weight: 500;
+				color: var(--text-strong);
+				cursor: pointer;
+				list-style: none;
+			}
+			summary::-webkit-details-marker {
+				display: none;
+			}
+			summary::after {
+				content: '+';
+				font-family: var(--mono);
+				font-size: 1.1rem;
+				font-weight: 400;
+				color: var(--muted);
+				transition: transform 0.3s var(--ease);
+			}
+			details[open] summary::after {
+				transform: rotate(45deg);
+			}
+			.skills {
+				display: flex;
+				flex-wrap: wrap;
+				gap: 0.35rem;
+				padding-bottom: 1rem;
+			}
+			.verify {
+				color: var(--text-strong);
+			}
+			.verify:hover {
+				color: var(--accent-light);
+			}
+			@media (max-width: 820px) {
+				.cert-grid {
+					grid-template-columns: 1fr;
+				}
+			}
+		</style>
 	</body>
 </html>

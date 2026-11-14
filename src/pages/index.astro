@@ -1,281 +1,559 @@
 ---
+import { getCollection } from 'astro:content';
 import BaseHead from '../components/BaseHead.astro';
 import Footer from '../components/Footer.astro';
 import FormattedDate from '../components/FormattedDate.astro';
 import Header from '../components/Header.astro';
-import { SITE_DESCRIPTION, SITE_TITLE, GITHUB_URL, LINKEDIN_URL, MEDIUM_URL, EMAIL } from '../consts';
-import { getCollection } from 'astro:content';
+import PostList from '../components/PostList.astro';
+import { EMAIL, GITHUB_URL, LINKEDIN_URL, MEDIUM_URL, SITE_DESCRIPTION, SITE_TITLE } from '../consts';
+import { getPosts } from '../lib/posts';
 
-const posts = (await getCollection('blog'))
-	.sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf())
-	.slice(0, 6);
+const allPosts = await getPosts();
+const posts = allPosts.slice(0, 7);
 
-const certs = await getCollection('certs');
+const certs = (await getCollection('certs')).sort((a, b) => b.data.dateEarned.valueOf() - a.data.dateEarned.valueOf());
 const cheatsheets = await getCollection('cheatsheets');
+const certNames = certs.map((c) => c.data.title.split(/\s[—-]\s/)[0]);
 
-function getPostType(tags: string[] = []): { label: string; badgeClass: string } {
-	if (tags.includes('ctf')) return { label: 'CTF', badgeClass: 'badge-writeup' };
-	if (tags.includes('htb')) return { label: 'HTB', badgeClass: 'badge-writeup' };
-	if (tags.includes('cert-journey')) return { label: 'Journey', badgeClass: 'badge-cert' };
-	return { label: 'Writeup', badgeClass: 'badge-article' };
-}
+const stats = [
+	{ n: allPosts.length, label: 'Writeups published' },
+	{ n: certs.length, label: 'Certifications earned' },
+	{ n: cheatsheets.length, label: 'Cheatsheets' },
+];
 ---
 
 <!doctype html>
 <html lang="en">
 	<head>
 		<BaseHead title={SITE_TITLE} description={SITE_DESCRIPTION} />
-		<style>
-			.hero {
-				display: flex;
-				align-items: center;
-				gap: 3em;
-				padding: 2.5em 0 3.5em;
-			}
-			.avatar {
-				width: 120px;
-				height: 120px;
-				border-radius: 0;
-				object-fit: cover;
-				flex-shrink: 0;
-			}
-			.hero-text h1 {
-				margin: 0 0 0.15em;
-				font-size: 2.2em;
-				letter-spacing: -0.03em;
-			}
-			.hero-text .tagline {
-				color: #4fc4b8;
-				font-size: 1em;
-				margin: 0 0 0.6em;
-				font-weight: 500;
-			}
-			.hero-text .bio {
-				color: #8ab8a8;
-				font-size: 0.9em;
-				line-height: 1.7;
-				margin: 0;
-				max-width: 540px;
-			}
-			.hero-links {
-				display: flex;
-				flex-wrap: wrap;
-				gap: 0.6em;
-				margin-top: 1em;
-			}
-			.hero-links a {
-				display: inline-flex;
-				align-items: center;
-				gap: 0.4em;
-				padding: 0.3em 0.8em;
-				border-radius: 0;
-				font-size: 0.85em;
-				font-weight: 500;
-				text-decoration: none;
-				color: #8ab8a8;
-			}
-			.hero-links a:hover {
-				color: #e0ede6;
-			}
-
-			.stats-grid {
-				display: grid;
-				grid-template-columns: repeat(3, 1fr);
-				gap: 1em;
-				margin-bottom: 3.5em;
-			}
-			.stat-card {
-				padding: 1.4em 1.2em;
-				text-align: center;
-			}
-			.stat-number {
-				font-size: 2em;
-				font-weight: 700;
-				color: #4fc4b8;
-				display: block;
-				line-height: 1.2;
-			}
-			.stat-label {
-				color: #8ab8a8;
-				font-size: 0.8em;
-				margin-top: 0.3em;
-				display: block;
-				font-weight: 500;
-			}
-
-			.post-grid {
-				display: grid;
-				grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
-				gap: 1.2em;
-				margin-bottom: 2em;
-			}
-			.post-card {
-				border-radius: 0;
-				overflow: hidden;
-			}
-			.post-card:hover {
-			}
-			.post-card a {
-				text-decoration: none;
-				color: inherit;
-				display: block;
-			}
-			.post-card .thumb {
-				width: 100%;
-				height: 220px;
-				object-fit: cover;
-				object-position: center;
-				display: block;
-				background: #222222;
-			}
-			.post-card .body {
-				padding: 1.2em 1.3em;
-			}
-			.post-card .top-row {
-				display: flex;
-				align-items: center;
-				gap: 0.6em;
-				margin-bottom: 0.5em;
-			}
-			.post-card h3 {
-				margin: 0 0 0.35em;
-				font-size: 1.05em;
-				color: #e0ede6;
-				line-height: 1.35;
-				transition: color 0.2s;
-			}
-			.post-card a:hover h3 {
-				color: #4fc4b8;
-			}
-			.post-card .meta {
-				color: #8ab8a8;
-				font-size: 0.78em;
-				margin-bottom: 0.5em;
-			}
-			.post-card .desc {
-				color: #8ab8a8;
-				font-size: 0.83em;
-				line-height: 1.55;
-				margin: 0;
-				display: -webkit-box;
-				-webkit-line-clamp: 2;
-				-webkit-box-orient: vertical;
-				overflow: hidden;
-			}
-			.post-card .tags {
-				display: flex;
-				gap: 0.35em;
-				flex-wrap: wrap;
-				margin-top: 0.7em;
-			}
-
-			.view-all-wrap {
-				text-align: center;
-				margin-bottom: 3em;
-			}
-
-			@media (max-width: 600px) {
-				.hero {
-					flex-direction: column;
-					text-align: center;
-					gap: 1.5em;
-					padding: 1.5em 0 2em;
-				}
-				.hero-text .bio {
-					max-width: 100%;
-				}
-				.hero-links {
-					justify-content: center;
-				}
-				.post-grid {
-					grid-template-columns: 1fr;
-				}
-				.stats-grid {
-					gap: 0.7em;
-				}
-				.stat-card {
-					padding: 1em 0.8em;
-				}
-				.explore-grid {
-					grid-template-columns: 1fr 1fr;
-				}
-			}
-		</style>
 	</head>
 	<body>
 		<Header />
 		<main>
 			<section class="hero">
-				<img class="avatar" src="/kakashi.jpg" alt="l3benn" />
 				<div class="hero-text">
-					<h1>Chiheb Mahfoudh</h1>
-					<p class="tagline">Security researcher &bull; CTF enthusiast &bull; Pentest student</p>
-					<p class="bio">
-						Breaking things, learning, and sharing writeups on penetration testing, AD security, CTF challenges, and red teaming.
+					<p class="status">
+						<span class="dot" aria-hidden="true"></span>
+						{certNames.join(' · ')} certified
 					</p>
-					<div class="hero-links">
-						<a href={GITHUB_URL} target="_blank">GitHub</a>
-						<a href={MEDIUM_URL} target="_blank">Medium</a>
-						<a href={LINKEDIN_URL} target="_blank">LinkedIn</a>
-						<a href="/about">About &rarr;</a>
+					<h1>Breaking things, <em>on purpose.</em></h1>
+					<p class="lead">
+						I'm <strong>Chiheb Mahfoudh</strong> — a student practicing cybersecurity at home and writing up what I learn
+						from penetration testing, Active Directory attacks, CTF challenges and red teaming.
+					</p>
+					<div class="cta">
+						<a class="btn" href="/writeups">Read the writeups <span class="arrow" aria-hidden="true">&rarr;</span></a>
+						<a class="btn btn-ghost" href="/about">About me</a>
+					</div>
+					<ul class="socials" aria-label="Profiles">
+						<li><a href={GITHUB_URL} target="_blank" rel="noopener">GitHub</a></li>
+						<li><a href={MEDIUM_URL} target="_blank" rel="noopener">Medium</a></li>
+						<li><a href={LINKEDIN_URL} target="_blank" rel="noopener">LinkedIn</a></li>
+					</ul>
+				</div>
+
+				<div class="eye" aria-hidden="true">
+					<div class="eye-glow"></div>
+					<svg class="eye-rings" viewBox="0 0 400 400">
+						<circle class="ring ticks" cx="200" cy="200" r="194"></circle>
+						<circle class="ring" cx="200" cy="200" r="178"></circle>
+						<circle class="ring dashed" cx="200" cy="200" r="150"></circle>
+						<g class="orbit">
+							{[0, 120, 240].map((deg) => (
+								<g transform={`rotate(${deg} 200 200)`}>
+									<circle cx="200" cy="50" r="11.2"></circle>
+									<path d="M188.8 50 C188.8 32.4 209.6 24.4 224 32.4 C212.8 32.4 208 40.4 211.2 50 Z"></path>
+								</g>
+							))}
+						</g>
+						<circle class="ring strong" cx="200" cy="200" r="112"></circle>
+					</svg>
+					<img class="eye-avatar" src="/kakashi.jpg" alt="" width="200" height="200" />
+				</div>
+			</section>
+
+			<dl class="stats" data-reveal>
+				{stats.map((s) => (
+					<div>
+						<dd data-count={s.n}>{s.n}</dd>
+						<dt>{s.label}</dt>
+					</div>
+				))}
+			</dl>
+
+			<section class="section">
+				<div class="section-head" data-reveal>
+					<div>
+						<p class="eyebrow">Latest</p>
+						<h2>Recent <em>writeups</em></h2>
+					</div>
+					<a class="link-arrow" href="/writeups">All {allPosts.length} writeups <span class="arrow" aria-hidden="true">&rarr;</span></a>
+				</div>
+				<PostList posts={posts} feature empty="No writeups yet. Check back soon." />
+			</section>
+
+			<section class="section">
+				<div class="section-head" data-reveal>
+					<div>
+						<p class="eyebrow">Explore</p>
+						<h2>More than <em>writeups</em></h2>
 					</div>
 				</div>
+				<div class="explore">
+					<a class="card explore-card" href="/cheatsheets" data-reveal style="--i:0">
+						<svg viewBox="0 0 24 24" aria-hidden="true"
+							><path d="M5 4h11l3 3v13H5zM9 9h6M9 13h6M9 17h3" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"
+							></path></svg
+						>
+						<h3>Cheatsheets</h3>
+						<p>Payloads and quick references for SQLi, XSS, file inclusion and more — built for use mid-engagement.</p>
+						<span class="count">{cheatsheets.length} references <span class="arrow">&rarr;</span></span>
+					</a>
+					<a class="card explore-card" href="/certs" data-reveal style="--i:1">
+						<svg viewBox="0 0 24 24" aria-hidden="true"
+							><circle cx="12" cy="9" r="5.5" fill="none" stroke="currentColor" stroke-width="1.5"></circle><path
+								d="M8.5 13.5L7 21l5-2.5L17 21l-1.5-7.5"
+								fill="none"
+								stroke="currentColor"
+								stroke-width="1.5"
+								stroke-linecap="round"
+								stroke-linejoin="round"></path></svg
+						>
+						<h3>Certifications</h3>
+						<p>{certNames.join(', ')} — what each exam covers, and how I prepared for it.</p>
+						<span class="count">{certs.length} earned <span class="arrow">&rarr;</span></span>
+					</a>
+					<a class="card explore-card" href="/certs/journeys" data-reveal style="--i:2">
+						<svg viewBox="0 0 24 24" aria-hidden="true"
+							><path d="M4 19c4-1 3-7 7-8s3-6 9-7M4 19h3M4 19v-3M20 4h-3M20 4v3" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"
+							></path></svg
+						>
+						<h3>Exam journeys</h3>
+						<p>Honest notes on studying for and sitting certification exams: the plan, the mistakes, the tips.</p>
+						<span class="count">Read the stories <span class="arrow">&rarr;</span></span>
+					</a>
+				</div>
 			</section>
 
-			<div class="stats-grid">
-				<div class="stat-card">
-					<span class="stat-number">{posts.length}</span>
-					<span class="stat-label">Writeups</span>
+			<section class="section">
+				<div class="section-head" data-reveal>
+					<div>
+						<p class="eyebrow">Credentials</p>
+						<h2>Certified, <em>hands-on</em></h2>
+					</div>
+					<a class="link-arrow" href="/certs">View all <span class="arrow" aria-hidden="true">&rarr;</span></a>
 				</div>
-				<div class="stat-card">
-					<span class="stat-number">{certs.length}</span>
-					<span class="stat-label">Certifications</span>
-				</div>
-				<div class="stat-card">
-					<span class="stat-number">{cheatsheets.length}</span>
-					<span class="stat-label">Cheatsheets</span>
-				</div>
-			</div>
-
-			<section>
-				<h2 class="section-title">Latest Writeups</h2>
-				{posts.length > 0 ? (
-					<>
-						<div class="post-grid">
-							{posts.map((post) => {
-								const type = getPostType(post.data.tags);
-								return (
-									<div class="post-card">
-										<a href={`/blog/${post.id}/`}>
-											{post.data.thumbnail && <img class="thumb" src={post.data.thumbnail} alt="" loading="lazy" />}
-											<div class="body">
-												<div class="top-row">
-													<span class={"badge " + type.badgeClass}>{type.label}</span>
-													<span class="meta"><FormattedDate date={post.data.pubDate} /></span>
-												</div>
-												<h3>{post.data.title}</h3>
-												{post.data.description && <p class="desc">{post.data.description}</p>}
-												{post.data.tags && post.data.tags.length > 0 && (
-													<div class="tags">
-														{post.data.tags.slice(0, 3).map((tag) => <span class="tag">{tag}</span>)}
-													</div>
-												)}
-											</div>
-										</a>
-									</div>
-								);
-							})}
-						</div>
-						<div class="view-all-wrap">
-							<a href="/writeups" class="btn">View all writeups &rarr;</a>
-						</div>
-					</>
-				) : (
-					<p>No writeups yet. Check back soon!</p>
-				)}
+				<ul class="cert-rows">
+					{certs.map((cert, i) => (
+						<li data-reveal style={`--i:${i}`}>
+							<a href="/certs">
+								<span class="cert-name">{cert.data.title}</span>
+								<span class="cert-issuer">{cert.data.issuer}</span>
+								<span class="cert-date"><FormattedDate date={cert.data.dateEarned} /></span>
+								<span class="arrow" aria-hidden="true">&rarr;</span>
+							</a>
+						</li>
+					))}
+				</ul>
 			</section>
 
+			<section class="section contact card" data-reveal>
+				<div>
+					<p class="eyebrow">Contact</p>
+					<h2>Working on something <em>worth breaking?</em></h2>
+					<p class="lead">Questions about a writeup, or looking for a CTF teammate? My inbox is open.</p>
+				</div>
+				<div class="cta">
+					<a class="btn" href={`mailto:${EMAIL}`}>Get in touch <span class="arrow" aria-hidden="true">&rarr;</span></a>
+					<a class="btn btn-ghost" href="/CV.pdf" target="_blank">Download CV</a>
+				</div>
+			</section>
 		</main>
 		<Footer />
+
+		<style>
+			/* ── Hero ─────────────────────────────────────────── */
+			.hero {
+				display: grid;
+				grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr);
+				align-items: center;
+				gap: 3rem;
+				padding: 2.5rem 0 4.5rem;
+			}
+			.hero-text > * {
+				animation: rise 0.9s var(--ease) both;
+			}
+			.hero-text > :nth-child(2) { animation-delay: 0.08s; }
+			.hero-text > :nth-child(3) { animation-delay: 0.16s; }
+			.hero-text > :nth-child(4) { animation-delay: 0.24s; }
+			.hero-text > :nth-child(5) { animation-delay: 0.32s; }
+			@keyframes rise {
+				from {
+					opacity: 0;
+					transform: translateY(22px);
+				}
+			}
+			.status {
+				display: inline-flex;
+				align-items: center;
+				gap: 0.65em;
+				margin: 0 0 1.8rem;
+				padding: 0.38em 0.95em 0.38em 0.75em;
+				font-size: 0.8rem;
+				color: var(--text);
+				background: rgba(255, 255, 255, 0.04);
+				border: 1px solid var(--line);
+				border-radius: 999px;
+			}
+			.dot {
+				position: relative;
+				width: 7px;
+				height: 7px;
+				background: var(--accent);
+				border-radius: 50%;
+			}
+			.dot::after {
+				content: '';
+				position: absolute;
+				inset: 0;
+				border-radius: 50%;
+				background: var(--accent);
+				animation: ping 2.4s var(--ease) infinite;
+			}
+			@keyframes ping {
+				to {
+					transform: scale(3.4);
+					opacity: 0;
+				}
+			}
+			.hero h1 {
+				margin: 0 0 1.5rem;
+				font-size: clamp(2.9rem, 7.2vw, 5.4rem);
+				line-height: 0.98;
+				letter-spacing: -0.055em;
+			}
+			.hero h1 em {
+				display: block;
+			}
+			.hero .lead {
+				margin-bottom: 2.2rem;
+			}
+			.cta {
+				display: flex;
+				flex-wrap: wrap;
+				gap: 0.7rem;
+			}
+			.socials {
+				display: flex;
+				gap: 1.6rem;
+				margin: 2.4rem 0 0;
+				padding: 0;
+				list-style: none;
+				font-size: 0.86rem;
+			}
+			.socials a {
+				position: relative;
+				color: var(--muted);
+			}
+			.socials a::after {
+				content: '';
+				position: absolute;
+				left: 0;
+				right: 0;
+				bottom: -3px;
+				height: 1px;
+				background: currentColor;
+				transform: scaleX(0);
+				transform-origin: 100% 50%;
+				transition: transform 0.35s var(--ease);
+			}
+			.socials a:hover {
+				color: var(--text-strong);
+			}
+			.socials a:hover::after {
+				transform: scaleX(1);
+				transform-origin: 0 50%;
+			}
+
+			/* avatar as the pupil of a slowly turning Sharingan */
+			.eye {
+				position: relative;
+				justify-self: center;
+				width: min(100%, 420px);
+				aspect-ratio: 1;
+				animation: eye-in 1.4s var(--ease) both 0.15s;
+			}
+			@keyframes eye-in {
+				from {
+					opacity: 0;
+					transform: scale(0.9) rotate(-18deg);
+				}
+			}
+			.eye-glow {
+				position: absolute;
+				inset: 8%;
+				border-radius: 50%;
+				background: radial-gradient(circle, rgba(var(--accent-rgb), 0.32), transparent 68%);
+				filter: blur(30px);
+				animation: breathe 6s ease-in-out infinite;
+			}
+			@keyframes breathe {
+				50% {
+					opacity: 0.55;
+					transform: scale(0.94);
+				}
+			}
+			.eye-rings {
+				position: absolute;
+				inset: 0;
+				width: 100%;
+				height: 100%;
+				overflow: visible;
+			}
+			.ring {
+				fill: none;
+				stroke: rgba(255, 255, 255, 0.1);
+				stroke-width: 1;
+			}
+			.ring.ticks {
+				stroke: rgba(255, 255, 255, 0.22);
+				stroke-width: 6;
+				stroke-dasharray: 1 9.16;
+				transform-origin: 200px 200px;
+				animation: spin 120s linear infinite reverse;
+			}
+			.ring.dashed {
+				stroke: rgba(var(--accent-rgb), 0.5);
+				stroke-dasharray: 3 9;
+			}
+			.ring.strong {
+				stroke: rgba(var(--accent-rgb), 0.55);
+				stroke-width: 1.5;
+			}
+			.orbit {
+				fill: var(--accent);
+				transform-origin: 200px 200px;
+				animation: spin 36s linear infinite;
+				filter: drop-shadow(0 0 10px rgba(var(--accent-rgb), 0.7));
+			}
+			@keyframes spin {
+				to {
+					transform: rotate(360deg);
+				}
+			}
+			.eye-avatar {
+				position: absolute;
+				inset: 0;
+				width: 50%;
+				height: 50%;
+				margin: auto;
+				object-fit: cover;
+				border-radius: 50%;
+				border: 1px solid rgba(255, 255, 255, 0.18);
+				box-shadow: 0 0 0 6px rgba(7, 8, 10, 0.9), 0 30px 80px -20px rgba(var(--accent-rgb), 0.6);
+			}
+
+			/* ── Stats ────────────────────────────────────────── */
+			.stats {
+				display: grid;
+				grid-template-columns: repeat(3, 1fr);
+				margin: 0;
+				border-top: 1px solid var(--line);
+				border-bottom: 1px solid var(--line);
+			}
+			.stats > div {
+				padding: 2rem 0 2rem 2rem;
+				border-left: 1px solid var(--line);
+			}
+			.stats > div:first-child {
+				padding-left: 0;
+				border-left: none;
+			}
+			.stats dd {
+				margin: 0;
+				font-size: clamp(2.2rem, 4.5vw, 3.2rem);
+				font-weight: 500;
+				line-height: 1;
+				letter-spacing: -0.05em;
+				font-variant-numeric: tabular-nums;
+				color: var(--text-strong);
+			}
+			.stats dt {
+				margin-top: 0.7rem;
+				font-family: var(--mono);
+				font-size: 0.7rem;
+				letter-spacing: 0.12em;
+				text-transform: uppercase;
+				color: var(--muted);
+			}
+
+			/* ── Explore ──────────────────────────────────────── */
+			.explore {
+				display: grid;
+				grid-template-columns: repeat(3, minmax(0, 1fr));
+				gap: 1.25rem;
+			}
+			.explore-card {
+				display: flex;
+				flex-direction: column;
+				padding: 1.8rem;
+			}
+			.explore-card svg {
+				width: 40px;
+				height: 40px;
+				margin-bottom: 2.2rem;
+				padding: 8px;
+				color: var(--accent);
+				background: rgba(var(--accent-rgb), 0.08);
+				border: 1px solid rgba(var(--accent-rgb), 0.2);
+				border-radius: 11px;
+			}
+			.explore-card h3 {
+				margin: 0 0 0.5rem;
+				font-size: 1.25rem;
+			}
+			.explore-card p {
+				margin: 0 0 1.8rem;
+				font-size: 0.92rem;
+				line-height: 1.6;
+				color: var(--muted);
+			}
+			.count {
+				display: inline-flex;
+				gap: 0.5em;
+				margin-top: auto;
+				font-size: 0.86rem;
+				font-weight: 500;
+				color: var(--text-strong);
+			}
+
+			/* ── Certification rows ───────────────────────────── */
+			.cert-rows {
+				margin: 0;
+				padding: 0;
+				list-style: none;
+				border-top: 1px solid var(--line);
+			}
+			.cert-rows a {
+				display: grid;
+				grid-template-columns: minmax(0, 1fr) 11rem 8rem 1.5rem;
+				align-items: center;
+				gap: 1.5rem;
+				padding: 1.4rem 0.5rem;
+				color: var(--muted);
+				border-bottom: 1px solid var(--line);
+				transition: padding 0.35s var(--ease), background 0.3s, color 0.2s;
+			}
+			.cert-rows a:hover {
+				padding-left: 1.2rem;
+				padding-right: 1.2rem;
+				background: rgba(255, 255, 255, 0.025);
+			}
+			.cert-name {
+				font-size: 1.15rem;
+				font-weight: 500;
+				letter-spacing: -0.02em;
+				color: var(--text-strong);
+			}
+			.cert-issuer,
+			.cert-date {
+				font-size: 0.88rem;
+			}
+			.cert-date {
+				font-family: var(--mono);
+				font-size: 0.76rem;
+				color: var(--faint);
+			}
+			.cert-rows .arrow {
+				transition: transform 0.25s var(--ease), color 0.2s;
+			}
+			.cert-rows a:hover .arrow {
+				color: var(--accent);
+				transform: translateX(4px);
+			}
+
+			/* ── Contact ──────────────────────────────────────── */
+			.contact {
+				display: flex;
+				align-items: flex-end;
+				justify-content: space-between;
+				flex-wrap: wrap;
+				gap: 2rem;
+				padding: 3.2rem;
+				background:
+					radial-gradient(ellipse 70% 120% at 100% 0%, rgba(var(--accent-rgb), 0.14), transparent 60%),
+					var(--card-bg);
+			}
+			.contact h2 {
+				margin: 0 0 0.9rem;
+				font-size: clamp(1.8rem, 3.6vw, 2.6rem);
+				letter-spacing: -0.04em;
+			}
+			.contact .lead {
+				margin: 0;
+			}
+
+			@media (max-width: 900px) {
+				.hero {
+					grid-template-columns: 1fr;
+					gap: 3.5rem;
+					padding: 1rem 0 3.5rem;
+				}
+				.eye {
+					width: min(78%, 320px);
+				}
+				.explore {
+					grid-template-columns: 1fr;
+				}
+				.cert-rows a {
+					grid-template-columns: minmax(0, 1fr) 1.5rem;
+					gap: 0.2rem 1rem;
+				}
+				.cert-issuer,
+				.cert-date {
+					grid-column: 1;
+				}
+				.cert-rows .arrow {
+					grid-column: 2;
+					grid-row: 1 / span 3;
+				}
+				.contact {
+					padding: 2rem 1.5rem;
+				}
+			}
+			@media (max-width: 560px) {
+				.stats > div {
+					padding: 1.4rem 0 1.4rem 1rem;
+				}
+				.stats dt {
+					font-size: 0.6rem;
+					letter-spacing: 0.08em;
+				}
+			}
+		</style>
+
+		<script>
+			// Count the stats up from zero the first time they scroll into view.
+			const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+			const nums = document.querySelectorAll<HTMLElement>('[data-count]');
+			if (!reduce && 'IntersectionObserver' in window) {
+				const io = new IntersectionObserver((entries) => {
+					for (const entry of entries) {
+						if (!entry.isIntersecting) continue;
+						io.unobserve(entry.target);
+						const el = entry.target as HTMLElement;
+						const target = Number(el.dataset.count);
+						const start = performance.now();
+						const step = (now: number) => {
+							const t = Math.min(1, (now - start) / 1100);
+							el.textContent = String(Math.round(target * (1 - Math.pow(1 - t, 4))));
+							if (t < 1) requestAnimationFrame(step);
+						};
+						requestAnimationFrame(step);
+					}
+				});
+				nums.forEach((el) => io.observe(el));
+			}
+		</script>
 	</body>
 </html>

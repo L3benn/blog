@@ -3,6 +3,7 @@ import { getCollection } from 'astro:content';
 import BaseHead from '../components/BaseHead.astro';
 import Footer from '../components/Footer.astro';
 import Header from '../components/Header.astro';
+import PageHeader from '../components/PageHeader.astro';
 import { SITE_TITLE } from '../consts';
 import fs from 'fs';
 import path from 'path';
@@ -82,42 +83,113 @@ for (const cert of certs) {
 	<head>
 		<BaseHead title={`Search - ${SITE_TITLE}`} description="Full-text search across all content" />
 		<style>
+			.search-field {
+				position: relative;
+				margin-bottom: 1.5rem;
+			}
+			.search-field svg {
+				position: absolute;
+				top: 50%;
+				left: 1.3rem;
+				color: var(--muted);
+				transform: translateY(-50%);
+				pointer-events: none;
+			}
 			.search-box {
 				width: 100%;
-				padding: 0.8em 1em;
-				font-size: 1.1em;
-				border: none;
-				border-radius: 0;
-				background: rgba(14, 34, 30, 0.8);
-				color: #e0ede6;
+				padding: 1.1rem 1.3rem 1.1rem 3.4rem;
+				font: inherit;
+				font-size: 1.1rem;
+				color: var(--text-strong);
+				background: var(--card-bg);
+				border: 1px solid var(--line);
+				border-radius: var(--radius);
 				outline: none;
-				margin-bottom: 2em;
-				box-sizing: border-box;
-				transition: border-color 0.2s;
+				transition: border-color 0.2s, box-shadow 0.3s;
 			}
-			.search-box:focus { outline: none; }
-			.search-box::placeholder { color: #5a8a7a; }
-			.result-count { color: #8ab8a8; font-size: 0.9em; margin-bottom: 1em; }
-			.result-list { list-style: none; padding: 0; margin: 0; }
-			.result-item { padding: 1em 0; transition: background 0.2s; }
-			.result-item:last-child { padding-bottom: 0; }
-			.result-item a { text-decoration: none; color: inherit; display: block; }
-			.result-item a:hover h3 { color: #4fc4b8; }
-			.result-item h3 { margin: 0 0 0.3em; font-size: 1.1em; color: #e0ede6; transition: color 0.2s; }
-			.result-meta { color: #8ab8a8; font-size: 0.8em; }
-			.result-desc { color: #b8d4c8; font-size: 0.85em; margin: 0.3em 0 0; line-height: 1.5; }
-			.result-type { display: inline-block; background: rgba(79,196,184,0.12); color: #6dd6ca; padding: 0.1em 0.4em; border-radius: 0; }
-			.result-item.highlight { animation: flash 1.2s ease; }
-			@keyframes flash { 0%, 100% { background: transparent; } 30% { background: rgba(79,196,184,0.12); } }
-			.no-results { text-align: center; padding: 3em; color: #8ab8a8; }
+			.search-box:focus {
+				border-color: rgba(var(--accent-rgb), 0.55);
+				box-shadow: 0 0 0 4px rgba(var(--accent-rgb), 0.1);
+			}
+			.search-box::placeholder {
+				color: var(--faint);
+			}
+			.result-count {
+				margin-bottom: 0.6rem;
+				font-family: var(--mono);
+				font-size: 0.72rem;
+				letter-spacing: 0.1em;
+				text-transform: uppercase;
+				color: var(--faint);
+			}
+			.result-list {
+				margin: 0;
+				padding: 0;
+				list-style: none;
+				border-top: 1px solid var(--line);
+			}
+			.result-item {
+				border-bottom: 1px solid var(--line);
+			}
+			.result-item a {
+				display: block;
+				padding: 1.3rem 0.4rem;
+				color: inherit;
+				transition: padding 0.35s var(--ease), background 0.3s;
+			}
+			.result-item a:hover {
+				padding-left: 1.1rem;
+				background: rgba(255, 255, 255, 0.025);
+			}
+			.result-item h3 {
+				display: flex;
+				align-items: center;
+				flex-wrap: wrap;
+				gap: 0.7rem;
+				margin: 0 0 0.35rem;
+				font-size: 1.12rem;
+			}
+			.result-type {
+				font-family: var(--mono);
+				font-size: 0.62rem;
+				font-weight: 500;
+				letter-spacing: 0.1em;
+				text-transform: uppercase;
+				padding: 0.25em 0.7em;
+				color: var(--accent-light);
+				background: rgba(var(--accent-rgb), 0.1);
+				border: 1px solid rgba(var(--accent-rgb), 0.22);
+				border-radius: 999px;
+			}
+			.result-meta {
+				font-family: var(--mono);
+				font-size: 0.72rem;
+				color: var(--faint);
+			}
+			.result-desc {
+				margin: 0.35rem 0 0;
+				font-size: 0.92rem;
+				color: var(--muted);
+			}
 		</style>
 	</head>
 	<body>
 		<Header />
 		<main>
-			<h1>Search</h1>
+			<PageHeader eyebrow="Search" lead="Full-text search across every writeup, cheatsheet and certification.">
+				Find <em>anything.</em>
+			</PageHeader>
 			<div id="search-app">
-				<input type="text" id="search-input" class="search-box" placeholder="Search across writeups, cheatsheets, and certifications..." autofocus />
+				<div class="search-field">
+					<svg viewBox="0 0 24 24" width="19" height="19" aria-hidden="true"
+						><circle cx="10.5" cy="10.5" r="6.5" fill="none" stroke="currentColor" stroke-width="2"></circle><path
+							d="M15.5 15.5L20.5 20.5"
+							stroke="currentColor"
+							stroke-width="2"
+							stroke-linecap="round"></path></svg
+					>
+					<input type="text" id="search-input" class="search-box" placeholder="Try “kerberos”, “union select”, “ssrf”…" aria-label="Search" autofocus />
+				</div>
 				<div id="result-count" class="result-count">{index.length} items</div>
 				<ul id="result-list" class="result-list">
 					{index.map((item, i) => (
@@ -144,7 +216,6 @@ for (const cert of certs) {
 
 			input.addEventListener('input', () => {
 				const q = input.value.toLowerCase().trim();
-				let firstIdx = -1;
 				let visible = 0;
 				for (let i = 0; i < items.length; i++) {
 					const d = data[i];
@@ -155,19 +226,9 @@ for (const cert of certs) {
 					items[i].style.display = match ? '' : 'none';
 					if (match) {
 						visible++;
-						if (firstIdx === -1) firstIdx = i;
 					}
 				}
 				count.textContent = q ? `${visible} of ${items.length} items` : `${items.length} items`;
-				items.forEach((el) => el.classList.remove('highlight'));
-				if (firstIdx !== -1) {
-					const el = items[firstIdx];
-					el.classList.add('highlight');
-					setTimeout(() => {
-						const top = el.getBoundingClientRect().top + window.scrollY - 80;
-						window.scrollTo({ top, behavior: 'smooth' });
-					}, 50);
-				}
 			});
 		</script>
 	</body>

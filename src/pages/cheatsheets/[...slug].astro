@@ -1,9 +1,6 @@
 ---
 import { type CollectionEntry, getCollection, render } from 'astro:content';
-import BaseHead from '../../components/BaseHead.astro';
-import Footer from '../../components/Footer.astro';
-import Header from '../../components/Header.astro';
-import { SITE_TITLE } from '../../consts';
+import BlogPost from '../../layouts/BlogPost.astro';
 
 export async function getStaticPaths() {
 	const sheets = await getCollection('cheatsheets');
@@ -15,48 +12,16 @@ export async function getStaticPaths() {
 type Props = CollectionEntry<'cheatsheets'>;
 
 const sheet = Astro.props;
-const { Content } = await render(sheet);
+const { Content, headings } = await render(sheet);
 ---
 
-<html lang="en">
-	<head>
-		<BaseHead title={`${sheet.data.title} - ${SITE_TITLE}`} description={sheet.data.description} />
-		<style>
-			.prose {
-				max-width: 880px;
-				margin: auto;
-			}
-			.title {
-				margin-bottom: 1.5em;
-				text-align: center;
-			}
-			.title h1 {
-				margin: 0 0 0.3em;
-			}
-			.title .category {
-				display: inline-block;
-				background: rgba(79, 196, 184, 0.1);
-				color: #6dd6ca;
-				padding: 0.2em 0.6em;
-				border-radius: 0;
-				font-size: 0.82em;
-				font-weight: 500;
-			}
-		</style>
-	</head>
-	<body>
-		<Header />
-		<main>
-			<article>
-				<div class="prose">
-					<div class="title">
-						{sheet.data.category && <span class="category">{sheet.data.category}</span>}
-						<h1>{sheet.data.title}</h1>
-					</div>
-					<Content />
-				</div>
-			</article>
-		</main>
-		<Footer />
-	</body>
-</html>
+<BlogPost
+	title={sheet.data.title}
+	description={sheet.data.description}
+	pubDate={sheet.data.pubDate}
+	tags={sheet.data.category ? [sheet.data.category] : []}
+	headings={headings}
+	back={{ href: '/cheatsheets', label: 'Cheatsheets' }}
+>
+	<Content />
+</BlogPost>

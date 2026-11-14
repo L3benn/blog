@@ -1,0 +1,60 @@
+---
+interface Props {
+	eyebrow?: string;
+	lead?: string;
+	back?: { href: string; label: string };
+}
+const { eyebrow, lead, back } = Astro.props;
+---
+
+<header class="page-head">
+	{back && (
+		<a class="back link-arrow" href={back.href}>
+			<span aria-hidden="true">&larr;</span> {back.label}
+		</a>
+	)}
+	{eyebrow && <p class="eyebrow">{eyebrow}</p>}
+	<div class="row">
+		<div>
+			<h1><slot /></h1>
+			{lead && <p class="lead">{lead}</p>}
+		</div>
+		<slot name="actions" />
+	</div>
+</header>
+
+<style>
+	.page-head {
+		margin-bottom: 3.5rem;
+		animation: head-in 0.8s var(--ease) both;
+	}
+	.back {
+		display: flex;
+		width: fit-content;
+		margin-bottom: 2rem;
+	}
+	.row {
+		display: flex;
+		align-items: flex-end;
+		justify-content: space-between;
+		flex-wrap: wrap;
+		gap: 1.5rem 2rem;
+	}
+	h1 {
+		margin: 0;
+	}
+	.lead {
+		margin: 1.1rem 0 0;
+	}
+	@keyframes head-in {
+		from {
+			opacity: 0;
+			transform: translateY(14px);
+		}
+	}
+	@media (max-width: 720px) {
+		.page-head {
+			margin-bottom: 2.5rem;
+		}
+	}
+</style>

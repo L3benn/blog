@@ -1,51 +1,137 @@
 ---
-const today = new Date();
+import { EMAIL, GITHUB_URL, LINKEDIN_URL, MEDIUM_URL, SITE_TITLE } from '../consts';
+import SiteEffects from './SiteEffects.astro';
+
+const year = new Date().getFullYear();
 ---
 
 <footer>
 	<div class="inner">
-		<div class="links">
-			<a href="/">Home</a>
-			<a href="/writeups">Writeups</a>
-			<a href="/cheatsheets">Cheatsheets</a>
-			<a href="/certs">Certifications</a>
-			<a href="/about">About</a>
+		<div class="top">
+			<div class="brand">
+				<a href="/" class="logo">{SITE_TITLE}<span>.</span></a>
+				<p class="quote serif">
+					&ldquo;Those who break the rules are scum, but those who abandon their friends are worse than scum.&rdquo;
+				</p>
+			</div>
+			<nav class="col" aria-label="Site">
+				<h2>Site</h2>
+				<a href="/writeups">Writeups</a>
+				<a href="/cheatsheets">Cheatsheets</a>
+				<a href="/certs">Certifications</a>
+				<a href="/about">About</a>
+			</nav>
+			<nav class="col" aria-label="Elsewhere">
+				<h2>Elsewhere</h2>
+				<a href={GITHUB_URL} target="_blank" rel="noopener">GitHub</a>
+				<a href={MEDIUM_URL} target="_blank" rel="noopener">Medium</a>
+				<a href={LINKEDIN_URL} target="_blank" rel="noopener">LinkedIn</a>
+				<a href={`mailto:${EMAIL}`}>Email</a>
+			</nav>
+			<nav class="col" aria-label="More">
+				<h2>More</h2>
+				<a href="/search">Full-text search</a>
+				<a href="/rss.xml">RSS feed</a>
+				<a href="/CV.pdf" target="_blank">Download CV</a>
+			</nav>
 		</div>
-		<p class="copy">&copy; {today.getFullYear()} Chiheb Mahfoudh. All rights reserved.</p>
+		<div class="bottom">
+			<p>&copy; {year} Chiheb Mahfoudh</p>
+			<p class="keys">
+				<span><kbd>Ctrl</kbd> <kbd>K</kbd> search</span>
+				<span><kbd>S</kbd> Sharingan</span>
+			</p>
+		</div>
 	</div>
 </footer>
+<SiteEffects />
+
 <style>
 	footer {
-		padding: 2em 1em 2.5em;
-		text-align: center;
-		font-size: 0.85em;
+		margin-top: 4rem;
+		padding: 0 var(--gutter);
+		border-top: 1px solid var(--line);
+		background: linear-gradient(rgba(255, 255, 255, 0.015), transparent);
 	}
 	.inner {
-		max-width: 920px;
+		max-width: var(--wrap);
 		margin: 0 auto;
+		padding: 3.5rem 0 2rem;
 	}
-	.links {
+	.top {
+		display: grid;
+		grid-template-columns: minmax(0, 1.8fr) repeat(3, minmax(0, 1fr));
+		gap: 2.5rem;
+	}
+	.logo {
+		font-size: 1.15rem;
+		font-weight: 600;
+		letter-spacing: -0.03em;
+		color: var(--text-strong);
+	}
+	.logo span {
+		color: var(--accent);
+	}
+	.quote {
+		max-width: 30ch;
+		margin: 1rem 0 0;
+		font-size: 1.12rem;
+		line-height: 1.4;
+		color: var(--muted);
+	}
+	.col {
 		display: flex;
-		justify-content: center;
+		flex-direction: column;
+		gap: 0.6rem;
+	}
+	.col h2 {
+		margin: 0 0 0.4rem;
+		font-family: var(--mono);
+		font-size: 0.68rem;
+		font-weight: 500;
+		letter-spacing: 0.14em;
+		text-transform: uppercase;
+		color: var(--faint);
+	}
+	.col a {
+		width: fit-content;
+		font-size: 0.9rem;
+		color: var(--muted);
+	}
+	.col a:hover {
+		color: var(--text-strong);
+	}
+	.bottom {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
 		flex-wrap: wrap;
-		gap: 0.3em;
-		margin-bottom: 1em;
+		gap: 0.8rem 2rem;
+		margin-top: 3.5rem;
+		padding-top: 1.5rem;
+		border-top: 1px solid var(--line);
+		font-size: 0.8rem;
+		color: var(--faint);
 	}
-	.links a {
-		padding: 0.4em 0.8em;
-		color: #5a8a7a;
-		text-decoration: none;
-		border-radius: 0;
-		font-size: 0.9em;
-		transition: all 0.2s;
-	}
-	.links a:hover {
-		color: #8ab8a8;
-		background: rgba(79, 196, 184, 0.06);
-	}
-	.copy {
-		color: #5a8a7a;
+	.bottom p {
 		margin: 0;
-		font-size: 0.85em;
+	}
+	.keys {
+		display: flex;
+		gap: 1.4rem;
+	}
+	@media (max-width: 760px) {
+		.top {
+			grid-template-columns: 1fr 1fr;
+			gap: 2rem 1.5rem;
+		}
+		.brand {
+			grid-column: 1 / -1;
+		}
+	}
+	@media (hover: none) {
+		.keys {
+			display: none;
+		}
 	}
 </style>

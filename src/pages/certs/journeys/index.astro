@@ -1,112 +1,30 @@
 ---
-import { getCollection } from 'astro:content';
 import BaseHead from '../../../components/BaseHead.astro';
 import Footer from '../../../components/Footer.astro';
-import FormattedDate from '../../../components/FormattedDate.astro';
 import Header from '../../../components/Header.astro';
+import PageHeader from '../../../components/PageHeader.astro';
+import PostList from '../../../components/PostList.astro';
 import { SITE_TITLE } from '../../../consts';
+import { getPosts } from '../../../lib/posts';
 
-const journeys = (await getCollection('blog'))
-	.filter((post) => post.data.tags?.includes('cert-journey'))
-	.sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
-const certs = await getCollection('certs');
-const certMap = new Map(certs.map((c) => [c.id, c.data.title]));
+const journeys = (await getPosts()).filter((post) => post.data.tags?.includes('cert-journey'));
 ---
 
 <!doctype html>
 <html lang="en">
 	<head>
 		<BaseHead title={`Certification Journeys - ${SITE_TITLE}`} description="My journey preparing for and passing certification exams" />
-		<style>
-			.back-link {
-				display: inline-flex;
-				align-items: center;
-				gap: 0.4em;
-				color: #8ab8a8;
-				text-decoration: none;
-				font-size: 0.9em;
-				font-weight: 500;
-				margin-bottom: 1.5em;
-				transition: color 0.2s;
-			}
-			.back-link:hover {
-				color: #e0ede6;
-			}
-			.back-link:hover {
-				color: #4fc4b8;
-			}
-			.journey-list {
-				list-style: none;
-				padding: 0;
-				margin: 0;
-			}
-			.journey-item {
-				padding: 1.5em 0;
-			}
-			.journey-item:last-child {
-				padding-bottom: 0;
-			}
-			.journey-item a {
-				text-decoration: none;
-				color: inherit;
-				display: block;
-			}
-			.journey-item a:hover h2 {
-				color: #4fc4b8;
-			}
-			.journey-item h2 {
-				margin: 0 0 0.3em;
-				font-size: 1.3em;
-				color: #e0ede6;
-				transition: color 0.2s;
-			}
-			.journey-item a:hover h2 {
-				color: #4fc4b8;
-			}
-			.journey-meta {
-				color: #8ab8a8;
-				font-size: 0.85em;
-				margin-bottom: 0.5em;
-			}
-			.journey-desc {
-				color: #8ab8a8;
-				margin: 0.5em 0;
-				font-size: 0.9em;
-				line-height: 1.5;
-			}
-			.empty-state {
-				text-align: center;
-				padding: 4em 1em;
-				color: #8ab8a8;
-			}
-		</style>
 	</head>
 	<body>
 		<Header />
 		<main>
-			<a class="back-link" href="/certs/">&larr; Back to Certifications</a>
-			<h1>Certification Journeys</h1>
-			<p>Blog posts about my experience preparing for and passing each certification exam.</p>
-
-			{journeys.length > 0 ? (
-				<ul class="journey-list">
-					{journeys.map((post) => (
-						<li class="journey-item">
-							<a href={`/blog/${post.id}/`}>
-								<h2>{post.data.title}</h2>
-								<div class="journey-meta">
-									<FormattedDate date={post.data.pubDate} />
-								</div>
-								{post.data.description && <p class="journey-desc">{post.data.description}</p>}
-							</a>
-						</li>
-					))}
-				</ul>
-			) : (
-				<div class="empty-state">
-					<p>No certification journey posts yet. Coming soon!</p>
-				</div>
-			)}
+			<PageHeader
+				back={{ href: '/certs/', label: 'Certifications' }}
+				lead="Posts about my experience preparing for and passing each certification exam."
+			>
+				Exam <em>journeys</em>
+			</PageHeader>
+			<PostList posts={journeys} empty="No certification journey posts yet. Coming soon." />
 		</main>
 		<Footer />
 	</body>
