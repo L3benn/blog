@@ -22,6 +22,7 @@
 
 <style>
 	.bgfx {
+		view-transition-name: bgfx;
 		position: fixed;
 		inset: 0;
 		z-index: -1;
@@ -68,7 +69,7 @@
 	if (canvas && !reduce) {
 		const ctx = canvas.getContext('2d')!;
 		type Pt = [number, number];
-		type Bolt = { paths: { pts: Pt[]; width: number }[]; born: number; life: number };
+		type Bolt = { paths: { pts: Pt[]; width: number }[]; born: number; life: number; strength: number };
 		let bolts: Bolt[] = [];
 		let w = 0;
 		let h = 0;
@@ -105,14 +106,24 @@
 			return pts;
 		}
 
-		function strike() {
-			// Start on an edge, travel a good distance across the viewport.
-			const fromLeft = Math.random() < 0.5;
-			const a: Pt = [fromLeft ? -20 : w + 20, Math.random() * h * 0.7];
-			const reach = (0.35 + Math.random() * 0.5) * w;
-			const b: Pt = [a[0] + (fromLeft ? reach : -reach), a[1] + (Math.random() - 0.3) * h * 0.6];
+		function strike(from?: Pt, strength = 1) {
+			let a: Pt;
+			let b: Pt;
+			if (from) {
+				// Radiate outwards from a point (a charged Chidori).
+				const ang = Math.random() * Math.PI * 2;
+				const reach = (0.25 + Math.random() * 0.35) * Math.max(w, h);
+				a = from;
+				b = [from[0] + Math.cos(ang) * reach, from[1] + Math.sin(ang) * reach];
+			} else {
+				// Start on an edge, travel a good distance across the viewport.
+				const fromLeft = Math.random() < 0.5;
+				a = [fromLeft ? -20 : w + 20, Math.random() * h * 0.7];
+				const reach = (0.35 + Math.random() * 0.5) * w;
+				b = [a[0] + (fromLeft ? reach : -reach), a[1] + (Math.random() - 0.3) * h * 0.6];
+			}
 			const main = jag(a, b, 0.22);
-			const paths = [{ pts: main, width: 1.4 }];
+			const paths = [{ pts: main, width: 1.4 * strength }];
 			const forks = 2 + Math.floor(Math.random() * 3);
 			for (let i = 0; i < forks; i++) {
 				const start = main[Math.floor((0.15 + Math.random() * 0.7) * main.length)];
@@ -120,7 +131,7 @@
 				const len = (0.08 + Math.random() * 0.16) * w;
 				paths.push({ pts: jag(start, [start[0] + Math.cos(ang) * len, start[1] + Math.sin(ang) * len], 0.3), width: 0.8 });
 			}
-			bolts.push({ paths, born: performance.now(), life: 520 + Math.random() * 260 });
+			bolts.push({ paths, born: performance.now(), life: 520 + Math.random() * 260, strength });
 			if (!raf) raf = requestAnimationFrame(draw);
 		}
 
@@ -138,7 +149,7 @@
 				const t = (now - bolt.born) / bolt.life;
 				// sharp flash, brief re-strike flicker, then decay
 				const flicker = t < 0.12 ? 1 : t < 0.2 ? 0.25 : t < 0.3 ? 0.8 : 1 - (t - 0.3) / 0.7;
-				const alpha = Math.max(0, flicker) * 0.42;
+				const alpha = Math.min(1, Math.max(0, flicker) * 0.42 * bolt.strength);
 				for (const path of bolt.paths) {
 					ctx.beginPath();
 					path.pts.forEach(([x, y], i) => (i ? ctx.lineTo(x, y) : ctx.moveTo(x, y)));
@@ -176,6 +187,12 @@
 		schedule();
 		// Expose for the mode toggle: a strike punctuates switching modes.
 		document.addEventListener('mode-change', () => strike());
+		// A full Chidori: a burst of bolts out of one point (detail = {x, y} in viewport px), or across the page.
+		document.addEventListener('chidori', (e) => {
+			const d = (e as CustomEvent<{ x: number; y: number } | undefined>).detail;
+			const from: Pt | undefined = d ? [d.x, d.y] : undefined;
+			for (let i = 0; i < 7; i++) setTimeout(() => strike(from ?? [w * (0.2 + Math.random() * 0.6), h * (0.2 + Math.random() * 0.5)], 2), i * 70);
+		});
 		window.addEventListener('pagehide', () => clearTimeout(timer));
 	}
 </script>

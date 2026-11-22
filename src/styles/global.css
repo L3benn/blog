@@ -50,10 +50,31 @@
 @view-transition {
 	navigation: auto;
 }
-::view-transition-old(root),
+/* Kamui: the old page twists away into a vortex, the new one unwinds in */
+::view-transition-old(root) {
+	animation: kamui-out 0.38s cubic-bezier(0.6, 0, 0.8, 0.4) both;
+}
 ::view-transition-new(root) {
-	animation-duration: 0.28s;
-	animation-timing-function: var(--ease);
+	animation: kamui-in 0.48s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+@keyframes kamui-out {
+	to {
+		opacity: 0;
+		transform: rotate(-9deg) scale(0.86);
+		filter: blur(6px);
+	}
+}
+@keyframes kamui-in {
+	from {
+		opacity: 0;
+		transform: rotate(7deg) scale(1.06);
+		filter: blur(6px);
+	}
+}
+/* the header and background stay put while the page warps */
+::view-transition-group(site-header),
+::view-transition-group(bgfx) {
+	animation-duration: 0s;
 }
 
 *,

@@ -5,7 +5,7 @@ import BackgroundFX from './BackgroundFX.astro';
 
 <BackgroundFX />
 
-<div id="read-progress" aria-hidden="true"><span></span></div>
+<div id="read-progress" aria-hidden="true"><span></span><i></i></div>
 
 <button id="to-top" type="button" aria-label="Back to top" title="Back to top">
 	<svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"
@@ -47,6 +47,24 @@ import BackgroundFX from './BackgroundFX.astro';
 	}
 	#read-progress.on {
 		display: block;
+	}
+	/* a little Chidori crackling at the tip of the bar */
+	#read-progress i {
+		position: absolute;
+		top: -5px;
+		left: -6px;
+		width: 12px;
+		height: 12px;
+		border-radius: 50%;
+		background: radial-gradient(circle, #fff 0 18%, rgba(var(--accent-rgb), 0.9) 30%, transparent 70%);
+		filter: drop-shadow(0 0 6px rgba(var(--accent-rgb), 0.9));
+		animation: spark 0.18s steps(2) infinite;
+	}
+	@keyframes spark {
+		50% {
+			transform: scale(1.35) rotate(40deg);
+			opacity: 0.7;
+		}
 	}
 	#read-progress span {
 		display: block;
@@ -210,6 +228,59 @@ import BackgroundFX from './BackgroundFX.astro';
 		}
 	}
 
+	#mode-flash.big {
+		background: radial-gradient(circle at var(--fx, 50%) var(--fy, 50%), rgba(255, 255, 255, 0.5), rgba(var(--accent-rgb), 0.35) 12%, transparent 60%);
+	}
+	html.chidori main {
+		animation: jolt 0.4s steps(6);
+	}
+	@keyframes jolt {
+		20% { transform: translate(3px, -2px); }
+		40% { transform: translate(-3px, 2px); }
+		60% { transform: translate(2px, 1px); }
+		80% { transform: translate(-1px, -1px); }
+	}
+
+	#palette-list li.jutsu .p-type {
+		color: rgba(var(--accent-rgb), 0.85);
+	}
+	#palette-list li.jutsu .p-title::before {
+		content: '';
+		display: inline-block;
+		width: 0.5em;
+		height: 0.5em;
+		margin-right: 0.7rem;
+		vertical-align: 0.1em;
+		border-radius: 50%;
+		background: var(--accent);
+		box-shadow: 0 0 10px rgba(var(--accent-rgb), 0.9);
+	}
+
+	.copy-btn {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.45em;
+	}
+	.copy-btn svg {
+		flex-shrink: 0;
+		transition: color 0.2s;
+	}
+	.copy-btn .tomoe {
+		transform-origin: 50px 50px;
+	}
+	.copy-btn.copied svg {
+		color: #ff5a5f;
+		filter: drop-shadow(0 0 4px rgba(255, 90, 95, 0.8));
+	}
+	.copy-btn.copied .tomoe {
+		animation: tomoe-spin 0.7s cubic-bezier(0.3, 0, 0.2, 1);
+	}
+	@keyframes tomoe-spin {
+		to {
+			transform: rotate(360deg);
+		}
+	}
+
 	/* hidden extra: type "kamui" */
 	#kamui {
 		position: fixed;
@@ -296,6 +367,7 @@ import BackgroundFX from './BackgroundFX.astro';
 	/* ── Reading progress + back to top ───────────────────────── */
 	const progress = document.getElementById('read-progress')!;
 	const bar = progress.querySelector('span')!;
+	const spark = progress.querySelector('i')!;
 	const toTop = document.getElementById('to-top')!;
 	const article = document.querySelector('article');
 	if (article) progress.classList.add('on');
@@ -307,7 +379,12 @@ import BackgroundFX from './BackgroundFX.astro';
 		requestAnimationFrame(() => {
 			const y = window.scrollY;
 			const max = root.scrollHeight - window.innerHeight;
-			if (article) bar.style.transform = `scaleX(${max > 0 ? Math.min(1, y / max) : 0})`;
+			if (article) {
+				const p = max > 0 ? Math.min(1, y / max) : 0;
+				bar.style.transform = `scaleX(${p})`;
+				spark.style.translate = `${p * window.innerWidth}px 0`;
+				spark.style.opacity = p > 0.002 && p < 0.998 ? '1' : '0';
+			}
 			toTop.classList.toggle('show', y > 700);
 			header?.classList.toggle('scrolled', y > 24);
 			ticking = false;
@@ -358,31 +435,79 @@ import BackgroundFX from './BackgroundFX.astro';
 		wrap.appendChild(table);
 	});
 
-	/* ── Copy buttons on code blocks ──────────────────────────── */
+	/* ── Copy Ninja: copy buttons on code blocks ───────────────── */
+	const EYE =
+		'<svg viewBox="0 0 100 100" width="13" height="13" aria-hidden="true"><circle cx="50" cy="50" r="44" fill="none" stroke="currentColor" stroke-width="8"/><circle cx="50" cy="50" r="9" fill="currentColor"/><g class="tomoe" fill="currentColor"><circle cx="50" cy="23" r="7.5"/><circle cx="73.4" cy="63.5" r="7.5"/><circle cx="26.6" cy="63.5" r="7.5"/></g></svg>';
 	document.querySelectorAll<HTMLPreElement>('.prose pre').forEach((pre) => {
 		const btn = document.createElement('button');
 		btn.type = 'button';
 		btn.className = 'copy-btn';
-		btn.textContent = 'Copy';
+		btn.title = 'Copy Ninja';
+		btn.innerHTML = EYE + '<span>Copy</span>';
+		const label = btn.querySelector('span')!;
 		btn.addEventListener('click', async () => {
 			const code = pre.querySelector('code')?.innerText ?? '';
 			try {
 				await navigator.clipboard.writeText(code);
-				btn.textContent = 'Copied';
+				label.textContent = 'Copied';
+				btn.classList.remove('copied');
+				void btn.offsetWidth;
 				btn.classList.add('copied');
 			} catch {
-				btn.textContent = 'Failed';
+				label.textContent = 'Failed';
 			}
 			setTimeout(() => {
-				btn.textContent = 'Copy';
+				label.textContent = 'Copy';
 				btn.classList.remove('copied');
-			}, 1500);
+			}, 1600);
 		});
 		pre.appendChild(btn);
 	});
 
+	/* ── Chidori: a burst of lightning from a point ─────────────── */
+	function chidori(x = window.innerWidth / 2, y = window.innerHeight / 2) {
+		if (reduceMotion) return;
+		flash.style.setProperty('--fx', `${x}px`);
+		flash.style.setProperty('--fy', `${y}px`);
+		flash.classList.remove('go', 'big');
+		void flash.offsetWidth;
+		flash.classList.add('go', 'big');
+		root.classList.remove('chidori');
+		void root.offsetWidth;
+		root.classList.add('chidori');
+		setTimeout(() => root.classList.remove('chidori'), 450);
+		document.dispatchEvent(new CustomEvent('chidori', { detail: { x, y } }));
+	}
+	document.addEventListener('chidori-at', (e) => {
+		const d = (e as CustomEvent<{ x: number; y: number }>).detail;
+		chidori(d.x, d.y);
+	});
+
 	/* ── Command palette (Ctrl/⌘+K or /) ──────────────────────── */
-	type Item = { title: string; url: string; type: string; extra: string };
+	type Item = { title: string; url: string; type: string; extra: string; run?: () => void };
+	// Jutsu: actions, listed first when the palette opens.
+	const jutsu: Item[] = [
+		{
+			title: 'Kamui: warp to a random writeup',
+			url: '#',
+			type: 'Jutsu',
+			extra: 'random teleport',
+			run: () => {
+				const posts = (items ?? []).filter((i) => i.type === 'Writeup');
+				const pick = posts[Math.floor(Math.random() * posts.length)];
+				palette.close();
+				if (pick) kamui(() => (window.location.href = pick.url));
+			},
+		},
+		{ title: 'Chidori', url: '#', type: 'Jutsu', extra: 'lightning', run: () => (palette.close(), setTimeout(() => chidori(), 120)) },
+		{
+			title: 'Sharingan: toggle',
+			url: '#',
+			type: 'Jutsu',
+			extra: 'mode red theme',
+			run: () => (palette.close(), toggleMode(document.querySelector<HTMLElement>('[data-mode-toggle]'))),
+		},
+	];
 	const palette = document.getElementById('palette') as HTMLDialogElement;
 	const pInput = document.getElementById('palette-input') as HTMLInputElement;
 	const pList = document.getElementById('palette-list')!;
@@ -392,7 +517,7 @@ import BackgroundFX from './BackgroundFX.astro';
 
 	function renderPalette() {
 		const terms = pInput.value.trim().toLowerCase().split(/\s+/).filter(Boolean);
-		shown = (items ?? [])
+		shown = [...jutsu, ...(items ?? [])]
 			.map((it) => {
 				const title = it.title.toLowerCase();
 				const hay = `${title} ${it.type.toLowerCase()} ${it.extra.toLowerCase()}`;
@@ -419,6 +544,13 @@ import BackgroundFX from './BackgroundFX.astro';
 			li.setAttribute('aria-selected', String(i === sel));
 			const a = document.createElement('a');
 			a.href = it.url;
+			if (it.run) {
+				li.classList.add('jutsu');
+				a.addEventListener('click', (e) => {
+					e.preventDefault();
+					it.run!();
+				});
+			}
 			const title = document.createElement('span');
 			title.className = 'p-title';
 			title.textContent = it.title;
@@ -470,7 +602,9 @@ import BackgroundFX from './BackgroundFX.astro';
 			markSelected();
 		} else if (e.key === 'Enter' && shown[sel]) {
 			e.preventDefault();
-			window.location.href = shown[sel].url;
+			const it = shown[sel];
+			if (it.run) it.run();
+			else window.location.href = it.url;
 		}
 	});
 	palette.addEventListener('click', (e) => {
@@ -478,12 +612,16 @@ import BackgroundFX from './BackgroundFX.astro';
 	});
 	document.querySelectorAll('[data-palette-open]').forEach((el) => el.addEventListener('click', openPalette));
 
-	/* ── Keyboard: shortcuts + hidden "kamui" ─────────────────── */
+	/* ── Keyboard: shortcuts + hidden "kamui" / "chidori" ─────── */
 	let typed = '';
-	function kamui() {
-		if (reduceMotion || root.classList.contains('kamui')) return;
+	function kamui(then?: () => void) {
+		if (reduceMotion) return then?.();
+		if (root.classList.contains('kamui')) return;
 		root.classList.add('kamui');
-		setTimeout(() => root.classList.remove('kamui'), 1850);
+		setTimeout(() => {
+			if (then) return then();
+			root.classList.remove('kamui');
+		}, then ? 900 : 1850);
 	}
 	window.addEventListener('keydown', (e) => {
 		if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
@@ -501,10 +639,15 @@ import BackgroundFX from './BackgroundFX.astro';
 			return;
 		}
 		if (e.key.length === 1) {
-			typed = (typed + e.key.toLowerCase()).slice(-5);
-			if (typed === 'kamui') {
+			typed = (typed + e.key.toLowerCase()).slice(-7);
+			if (typed.endsWith('kamui')) {
 				typed = '';
 				kamui();
+				return;
+			}
+			if (typed === 'chidori') {
+				typed = '';
+				chidori();
 				return;
 			}
 		}

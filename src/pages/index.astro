@@ -52,8 +52,9 @@ const stats = [
 					</ul>
 				</div>
 
-				<div class="eye" aria-hidden="true">
+				<div class="eye" aria-hidden="true" title="Hold to charge a Chidori">
 					<div class="eye-glow"></div>
+					<div class="eye-charge"></div>
 					<svg class="eye-rings" viewBox="0 0 400 400">
 						<circle class="ring ticks" cx="200" cy="200" r="194"></circle>
 						<circle class="ring" cx="200" cy="200" r="178"></circle>
@@ -68,7 +69,8 @@ const stats = [
 						</g>
 						<circle class="ring strong" cx="200" cy="200" r="112"></circle>
 					</svg>
-					<img class="eye-avatar" src="/kakashi.jpg" alt="" width="200" height="200" />
+					<img class="eye-avatar" src="/kakashi.jpg" alt="" width="200" height="200" draggable="false" />
+					<span class="eye-hint">hold to charge · Chidori</span>
 				</div>
 			</section>
 
@@ -353,6 +355,87 @@ const stats = [
 				box-shadow: 0 0 0 6px rgba(7, 8, 10, 0.9), 0 30px 80px -20px rgba(var(--accent-rgb), 0.6);
 			}
 
+			/* hold the eye to charge a Chidori, release to strike */
+			.eye {
+				cursor: grab;
+				user-select: none;
+				-webkit-user-select: none;
+				-webkit-touch-callout: none;
+				touch-action: none;
+			}
+			.eye-charge {
+				position: absolute;
+				inset: 22%;
+				border-radius: 50%;
+				opacity: 0;
+				background:
+					repeating-conic-gradient(from 0deg, rgba(255, 255, 255, 0.9) 0 2deg, transparent 2deg 17deg),
+					radial-gradient(circle, rgba(var(--accent-rgb), 0.9), transparent 70%);
+				mask: radial-gradient(circle, transparent 46%, #000 50%, transparent 72%);
+				-webkit-mask: radial-gradient(circle, transparent 46%, #000 50%, transparent 72%);
+				filter: blur(0.5px) drop-shadow(0 0 12px rgba(var(--accent-rgb), 1));
+				transition: opacity 0.25s, transform 0.25s;
+				pointer-events: none;
+			}
+			.eye.charging {
+				cursor: grabbing;
+			}
+			.eye.charging .eye-charge {
+				opacity: calc(0.3 + var(--charge, 0) * 0.7);
+				transform: scale(calc(1 + var(--charge, 0) * 0.35));
+				animation: crackle 0.12s steps(3) infinite;
+			}
+			.eye.charging .orbit {
+				animation-duration: 1.2s;
+			}
+			.eye.charging .eye-glow {
+				opacity: 1;
+				transform: scale(calc(1 + var(--charge, 0) * 0.25));
+				animation: none;
+			}
+			.eye.charging .eye-avatar {
+				animation: buzz 0.09s steps(2) infinite;
+				box-shadow: 0 0 0 6px rgba(7, 8, 10, 0.9), 0 0 calc(40px + var(--charge, 0) * 80px) rgba(var(--accent-rgb), 0.9);
+			}
+			.eye.charged .eye-charge {
+				filter: blur(0.5px) drop-shadow(0 0 18px #fff);
+			}
+			@keyframes crackle {
+				33% { rotate: 120deg; }
+				66% { rotate: 240deg; }
+				100% { rotate: 360deg; }
+			}
+			@keyframes buzz {
+				50% { translate: 1px -1px; }
+			}
+			.eye-hint {
+				position: absolute;
+				left: 50%;
+				bottom: -0.6rem;
+				translate: -50% 0;
+				font-family: var(--mono);
+				font-size: 0.66rem;
+				letter-spacing: 0.14em;
+				text-transform: uppercase;
+				white-space: nowrap;
+				color: var(--faint);
+				opacity: 0;
+				transition: opacity 0.3s, color 0.3s;
+				pointer-events: none;
+			}
+			.eye:hover .eye-hint {
+				opacity: 1;
+			}
+			.eye.charging .eye-hint {
+				opacity: 1;
+				color: var(--accent);
+			}
+			@media (hover: none) {
+				.eye-hint {
+					opacity: 0.8;
+				}
+			}
+
 			/* ── Stats ────────────────────────────────────────── */
 			.stats {
 				display: grid;
@@ -553,6 +636,43 @@ const stats = [
 					}
 				});
 				nums.forEach((el) => io.observe(el));
+			}
+
+			// Chidori: hold the eye to charge, release to strike.
+			const eye = document.querySelector<HTMLElement>('.eye');
+			if (eye && !reduce) {
+				let start = 0;
+				let raf = 0;
+				const FULL = 900;
+				const tick = (now: number) => {
+					const c = Math.min(1, (now - start) / FULL);
+					eye.style.setProperty('--charge', c.toFixed(3));
+					eye.classList.toggle('charged', c >= 1);
+					raf = requestAnimationFrame(tick);
+				};
+				const begin = (e: PointerEvent) => {
+					if (e.button > 0) return;
+					e.preventDefault();
+					eye.setPointerCapture?.(e.pointerId);
+					start = performance.now();
+					eye.classList.add('charging');
+					raf = requestAnimationFrame(tick);
+				};
+				const release = (fire: boolean) => {
+					if (!eye.classList.contains('charging')) return;
+					cancelAnimationFrame(raf);
+					const charged = eye.classList.contains('charged');
+					eye.classList.remove('charging', 'charged');
+					eye.style.removeProperty('--charge');
+					if (fire && charged) {
+						const r = eye.getBoundingClientRect();
+						document.dispatchEvent(new CustomEvent('chidori-at', { detail: { x: r.left + r.width / 2, y: r.top + r.height / 2 } }));
+					}
+				};
+				eye.addEventListener('pointerdown', begin);
+				eye.addEventListener('pointerup', () => release(true));
+				eye.addEventListener('pointercancel', () => release(false));
+				eye.addEventListener('contextmenu', (e) => e.preventDefault());
 			}
 		</script>
 	</body>

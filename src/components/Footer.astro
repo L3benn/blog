@@ -3,6 +3,14 @@ import { EMAIL, GITHUB_URL, LINKEDIN_URL, MEDIUM_URL, SITE_TITLE } from '../cons
 import SiteEffects from './SiteEffects.astro';
 
 const year = new Date().getFullYear();
+
+// Kakashi lines, one shown at a time.
+const quotes = [
+	'Those who break the rules are scum, but those who abandon their friends are worse than scum.',
+	'Look underneath the underneath.',
+	'Sorry I’m late. I got lost on the path of life.',
+	'I’ll protect my comrades, even at the cost of my life.',
+];
 ---
 
 <footer>
@@ -10,9 +18,10 @@ const year = new Date().getFullYear();
 		<div class="top">
 			<div class="brand">
 				<a href="/" class="logo">{SITE_TITLE}<span>.</span></a>
-				<p class="quote serif">
-					&ldquo;Those who break the rules are scum, but those who abandon their friends are worse than scum.&rdquo;
-				</p>
+				<figure class="quote-box">
+					<blockquote class="quote serif" data-quotes={JSON.stringify(quotes)}>&ldquo;{quotes[0]}&rdquo;</blockquote>
+					<figcaption>&mdash; Kakashi Hatake</figcaption>
+				</figure>
 			</div>
 			<nav class="col" aria-label="Site">
 				<h2>Site</h2>
@@ -46,6 +55,27 @@ const year = new Date().getFullYear();
 </footer>
 <SiteEffects />
 
+<script>
+	// Cycle through Kakashi's lines.
+	const q = document.querySelector<HTMLElement>('[data-quotes]');
+	if (q) {
+		const lines: string[] = JSON.parse(q.dataset.quotes || '[]');
+		let i = Math.floor(Math.random() * lines.length);
+		const show = () => (q.textContent = `\u201C${lines[i]}\u201D`);
+		show();
+		if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches)
+			setInterval(() => {
+				if (document.hidden) return;
+				q.classList.add('swap');
+				setTimeout(() => {
+					i = (i + 1) % lines.length;
+					show();
+					q.classList.remove('swap');
+				}, 600);
+			}, 9000);
+	}
+</script>
+
 <style>
 	footer {
 		margin-top: 4rem;
@@ -72,9 +102,22 @@ const year = new Date().getFullYear();
 	.logo span {
 		color: var(--accent);
 	}
+	.quote-box {
+		margin: 1rem 0 0;
+	}
+	.quote-box figcaption {
+		margin-top: 0.6rem;
+		font-family: var(--mono);
+		font-size: 0.68rem;
+		letter-spacing: 0.12em;
+		text-transform: uppercase;
+		color: var(--faint);
+	}
 	.quote {
 		max-width: 30ch;
-		margin: 1rem 0 0;
+		min-height: 4.2em;
+		margin: 0;
+		transition: opacity 0.6s, filter 0.6s;
 		font-size: 1.12rem;
 		line-height: 1.4;
 		color: var(--muted);
@@ -119,6 +162,10 @@ const year = new Date().getFullYear();
 	.keys {
 		display: flex;
 		gap: 1.4rem;
+	}
+	.quote.swap {
+		opacity: 0;
+		filter: blur(4px);
 	}
 	@media (max-width: 760px) {
 		.top {

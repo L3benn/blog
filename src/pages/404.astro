@@ -1,0 +1,83 @@
+---
+import BaseHead from '../components/BaseHead.astro';
+import Footer from '../components/Footer.astro';
+import Header from '../components/Header.astro';
+import { SITE_TITLE } from '../consts';
+---
+
+<!doctype html>
+<html lang="en">
+	<head>
+		<BaseHead title={`Lost in Kamui · ${SITE_TITLE}`} description="This page was sent to another dimension." />
+	</head>
+	<body>
+		<Header />
+		<main class="lost">
+			<div class="vortex" aria-hidden="true">
+				<svg viewBox="0 0 200 200">
+					<circle cx="100" cy="100" r="94" fill="none" stroke="currentColor" stroke-width="3"></circle>
+					<circle cx="100" cy="100" r="13" fill="currentColor"></circle>
+					{[0, 120, 240].map((deg) => (
+						<path
+							transform={`rotate(${deg} 100 100)`}
+							fill="currentColor"
+							d="M100 88 C94 62 108 30 146 18 C128 40 122 64 130 96 C120 86 110 84 100 88 Z"
+						/>
+					))}
+				</svg>
+			</div>
+			<p class="eyebrow">Error 404</p>
+			<h1>Yo. Sorry, <em>I’m late.</em></h1>
+			<p class="lead">
+				I got lost on the path of life — and so did this page. It was pulled into the Kamui dimension and isn’t coming
+				back.
+			</p>
+			<div class="actions">
+				<a class="btn" href="/">Back to the village</a>
+				<button class="btn btn-ghost" type="button" data-palette-open>Search the archives</button>
+			</div>
+		</main>
+		<Footer />
+	</body>
+</html>
+
+<style>
+	.lost {
+		display: grid;
+		justify-items: center;
+		align-content: center;
+		min-height: 78vh;
+		text-align: center;
+	}
+	.vortex {
+		width: min(220px, 52vw);
+		aspect-ratio: 1;
+		margin-bottom: 2rem;
+		color: var(--accent);
+		filter: drop-shadow(0 0 30px rgba(var(--accent-rgb), 0.55));
+	}
+	.vortex svg {
+		width: 100%;
+		height: 100%;
+		animation: pull 6s linear infinite;
+	}
+	@keyframes pull {
+		to {
+			transform: rotate(-360deg);
+		}
+	}
+	h1 {
+		margin: 0.4rem 0 0;
+	}
+	.lead {
+		max-width: 44ch;
+		margin: 1.2rem auto 0;
+	}
+	.actions {
+		display: flex;
+		flex-wrap: wrap;
+		justify-content: center;
+		gap: 0.8rem;
+		margin-top: 2.2rem;
+	}
+</style>
